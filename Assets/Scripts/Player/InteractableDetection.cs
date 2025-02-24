@@ -26,7 +26,7 @@ public class InteractableDetection : MonoBehaviour
 
     void OnTriggerExit2D(Collider2D collision)
     {
-        Interactable.OnTriggerExit();
+        Interactable?.OnTriggerExit();
         
         IsInteractableNearby = false;
         Interactable = null;
