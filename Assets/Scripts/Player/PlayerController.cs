@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour {
         _playerMovement.Move(InputManager.Movement);
 
         if (InputManager.InteractPressed) {
+            Debug.Log("Interact pressed");
             _interactableDetection.InteractObject();
         }
     }

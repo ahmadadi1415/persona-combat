@@ -19,6 +19,6 @@ public class InputManager : MonoBehaviour
     void Update()
     {
         Movement = _moveAction.ReadValue<Vector2>();
-        InteractPressed = _interactAction.IsPressed();
+        InteractPressed = _interactAction.WasPressedThisFrame();
     }
 }

@@ -7,7 +7,7 @@ public class InteractableDetection : MonoBehaviour
 
     public void InteractObject()
     {
-        if (IsInteractableNearby && Interactable == null) {
+        if (IsInteractableNearby && Interactable != null) {
             Interactable.Interact();
         }
     }
