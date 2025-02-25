@@ -11,7 +11,7 @@ public class Combatant : MonoBehaviour, ICombatant
     [field: SerializeField] public int Speed { get; private set; }
     [field: SerializeField] public int Power { get; private set; }
     [field: SerializeField] public int Defense { get; private set; }
-    [field: SerializeField] public float SpeedModifier { get; private set; }
+    [field: SerializeField] public float SpeedModifier { get; private set; } = 1;
 
     protected Animator _animator;
     private readonly int _attackAnim = Animator.StringToHash("Attack");
@@ -24,11 +24,26 @@ public class Combatant : MonoBehaviour, ICombatant
         ResetAttributes();
     }
 
+    private void OnEnable() {
+        EventManager.Subscribe<OnCombatEndedMessage>(OnCombatEnded);
+    }
+
+    private void OnDisable() {
+        EventManager.Unsubscribe<OnCombatEndedMessage>(OnCombatEnded);
+    }
+
+    private void OnCombatEnded(OnCombatEndedMessage message)
+    {
+        // DO: Reset speed modifier
+        SpeedModifier = 1;
+    }
+
     private void ResetAttributes()
     {
         Speed = stats.BaseSpeed;
         Power = stats.BasePower;
         Defense = stats.BaseDefense;
+        SpeedModifier = 1;
     }
 
     public void PerformAttack()
@@ -44,7 +59,8 @@ public class Combatant : MonoBehaviour, ICombatant
 
     public void TakeDamage(int damage)
     {
-        int damageTaken = damage - Defense;
+        if (Health <= 0) return;
+        int damageTaken = Mathf.Clamp(damage - Defense, 1, damage);
         Health -= damageTaken;
     }
 
@@ -62,19 +78,19 @@ public class Combatant : MonoBehaviour, ICombatant
 
     public virtual async UniTask<MoveData> GetMoveDataAsync() { return null; }
 
-    public void ExecuteMove(MoveData moveData, ICombatant combatant, ICombatant target)
+    public void ExecuteMove(MoveData moveData, ICombatant target)
     {
         switch (moveData.MoveType)
         {
             case MoveType.ATTACK:
                 PerformAttack();
-                target.TakeDamage(Mathf.FloorToInt(moveData.Power * combatant.Power));
+                target.TakeDamage((int)(moveData.Power * Power));
                 break;
             case MoveType.DEFEND:
-                combatant.BuffDefense(moveData.Power);
+                BuffDefense(moveData.Power);
                 break;
             case MoveType.SPELL:
-                combatant.Heal((int)moveData.Power);
+                Heal((int)moveData.Power);
                 break;
             case MoveType.RUN:
                 // DO: Notify CombatManager to stop combating

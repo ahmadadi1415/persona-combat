@@ -36,8 +36,8 @@ public class PlayerStatsUIController : MonoBehaviour
 
     private void UpdateStats(ICombatant player, ICombatant enemy)
     {
-        _playerStatsText.text = $"{player.Name} \nHealth\t:{player.Health} \nPower\t:{player.Power} \nDefense\t:{player.Defense} \nSpeed\t:{player.Speed}";
-        _enemyStatsText.text = $"{enemy.Name} \nHealth\t:{enemy.Health} \nPower\t:{enemy.Power} \nDefense\t:{enemy.Defense} \nSpeed\t:{enemy.Speed}";
+        _playerStatsText.text = $"{player.Name} \nHealth\t:{player.Health} \nPower\t:{player.Power} \nDefense\t:{player.Defense} \nSpeed\t:{player.Speed}(x{player.SpeedModifier})";
+        _enemyStatsText.text = $"{enemy.Name} \nHealth\t:{enemy.Health} \nPower\t:{enemy.Power} \nDefense\t:{enemy.Defense} \nSpeed\t:{enemy.Speed}(x{enemy.SpeedModifier})";
     }
 
 }

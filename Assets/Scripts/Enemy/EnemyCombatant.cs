@@ -6,7 +6,7 @@ public class EnemyCombatant : Combatant
     public override async UniTask<MoveData> GetMoveDataAsync()
     {
         // DO: Eligible moves are spell and attack
-        await UniTask.Yield();
+        await UniTask.WaitForSeconds(2);
 
         MoveData attackMove = new()
         {

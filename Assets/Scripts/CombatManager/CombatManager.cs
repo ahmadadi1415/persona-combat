@@ -14,6 +14,8 @@ public class CombatManager : MonoBehaviour
     private int currentTurnIndex = 0;
 
     private ICombatant playerCombatant, enemyCombatant;
+    public ICombatant ActiveCombatant { get; private set; } = null;
+    
     private void OnEnable()
     {
         EventManager.Subscribe<OnTriggerCombatMessage>(OnTriggerCombat);
@@ -92,14 +94,20 @@ public class CombatManager : MonoBehaviour
             ICombatant target = activeCombatant == enemyCombatant ? playerCombatant : enemyCombatant;
 
             MoveData move = await activeCombatant.GetMoveDataAsync();
-            activeCombatant.ExecuteMove(move, activeCombatant, target);
+            activeCombatant.ExecuteMove(move, target);
 
+            NotifyBattlingCombatState();
             if (IsCombatOver()) break;
 
             currentTurnIndex = (currentTurnIndex + 1) % combatants.Count;
-        }   
+        }
 
         EndCombat();
+    }
+
+    private void NotifyBattlingCombatState()
+    {
+        EventManager.Publish<OnBattlingCombatMessage>(new() { PlayerCombatant = playerCombatant, EnemyCombatant = enemyCombatant });
     }
 
     private void EndCombat()

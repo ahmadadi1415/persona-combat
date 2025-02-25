@@ -18,5 +18,5 @@ public interface ICombatant
     public void BuffDefense(float buffDefensePercentage);
 
     public UniTask<MoveData> GetMoveDataAsync();
-    public void ExecuteMove(MoveData moveData, ICombatant combatant, ICombatant target);
+    public void ExecuteMove(MoveData moveData, ICombatant target);
 }
