@@ -5193,7 +5193,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _playerStatsText: {fileID: 237844330}
-  _enemyStatsText: {fileID: 0}
+  _enemyStatsText: {fileID: 73364280}
 --- !u!1 &1198680564
 GameObject:
   m_ObjectHideFlags: 0

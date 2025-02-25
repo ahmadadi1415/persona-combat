@@ -16,4 +16,4 @@ MonoBehaviour:
   BaseHealth: 100
   BaseSpeed: 20
   BasePower: 30
-  BaseDefense: 20
+  BaseDefense: 10
