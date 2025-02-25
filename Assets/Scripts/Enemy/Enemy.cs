@@ -11,6 +11,7 @@ public class Enemy : MonoBehaviour
     public bool CanAttack { get; private set; } = true;
     public bool CanMove { get; private set; } = true;
     public bool IsAttacking { get; private set; } = false;
+    [field: SerializeField] public Vector2 FacingDirection { get; private set; } = Vector2.down;
     private readonly int _attackAnim = Animator.StringToHash("Attack");
     private readonly int _lastVerticalAnim = Animator.StringToHash("LastVertical");
     private readonly int _lastHorizontalAnim = Animator.StringToHash("LastHorizontal");
@@ -30,7 +31,7 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-        if (CanAttack && _enemyAttackArea.OtherCharacterDetected && _enemyAttackArea.DetectedCharacter.gameObject.CompareTag("Player"))
+        if (CanAttack && IsPlayerAhead())
         {
             Attack().Forget();
         }
@@ -40,18 +41,29 @@ public class Enemy : MonoBehaviour
     {
         while (true)
         {
-            await UniTask.WaitForSeconds(2f);
+            await UniTask.WaitForSeconds(3f);
             ChangeDirection();
         }
     }
 
+    private bool IsPlayerAhead()
+    {
+        bool isPlayerDetected = _enemyAttackArea.OtherCharacterDetected && _enemyAttackArea.DetectedCharacter.gameObject.CompareTag("Player");
+
+        if (!isPlayerDetected) return false;
+
+        Vector3 playerPosition = _enemyAttackArea.DetectedCharacter.gameObject.transform.position;
+        bool IsPlayerAhead = CharacterDirection.GetRelativePosition(transform.position, playerPosition, FacingDirection) == RelativeDirection.AHEAD;
+        return IsPlayerAhead;
+    }
+
     private void ChangeDirection()
     {
-        int randomX = Random.Range(-1, 2);
-        int randomY = Random.Range(-1, 2);
+        Vector2[] possibleDirections = { Vector2.right, Vector2.left, Vector2.up, Vector2.down };
+        FacingDirection = possibleDirections[Random.Range(0, possibleDirections.Length)];
 
-        _animator.SetFloat(_lastHorizontalAnim, randomX);
-        _animator.SetFloat(_lastVerticalAnim, randomY);
+        _animator.SetFloat(_lastHorizontalAnim, FacingDirection.x);
+        _animator.SetFloat(_lastVerticalAnim, FacingDirection.y);
     }
 
     private async UniTaskVoid Attack()

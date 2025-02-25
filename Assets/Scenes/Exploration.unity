@@ -4237,7 +4237,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1113003703}
-  - component: {fileID: 1113003704}
+  - component: {fileID: 1113003706}
   - component: {fileID: 1113003705}
   m_Layer: 0
   m_Name: AttackArea
@@ -4261,8 +4261,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 572971561}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!70 &1113003704
-CapsuleCollider2D:
+--- !u!114 &1113003705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1113003702}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da2bd16c7b4cf944388ba16e075c40bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <DetectedCharacter>k__BackingField: {fileID: 0}
+--- !u!58 &1113003706
+CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -4293,22 +4306,9 @@ CapsuleCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0.35}
-  m_Size: {x: 1.75, y: 1.5}
-  m_Direction: 1
---- !u!114 &1113003705
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1113003702}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: da2bd16c7b4cf944388ba16e075c40bd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  <DetectedCharacter>k__BackingField: {fileID: 0}
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 0.75
 --- !u!1 &1198680564
 GameObject:
   m_ObjectHideFlags: 0
