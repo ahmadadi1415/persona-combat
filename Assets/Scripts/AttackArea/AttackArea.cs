@@ -3,6 +3,7 @@ using UnityEngine;
 public class AttackArea : MonoBehaviour
 {
     [field: SerializeField] public Character DetectedCharacter { get; private set; }
+    public bool OtherCharacterDetected => DetectedCharacter != null;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
