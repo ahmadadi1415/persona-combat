@@ -1,10 +1,9 @@
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    private Character _character;
+    private Combatant _enemyCombatant;
     private AttackArea _enemyAttackArea;
     private Animator _animator;
 
@@ -19,7 +18,7 @@ public class Enemy : MonoBehaviour
 
     private void Awake()
     {
-        _character = GetComponent<Character>();
+        _enemyCombatant = GetComponent<EnemyCombatant>();
         _animator = GetComponent<Animator>();
         _enemyAttackArea = GetComponentInChildren<AttackArea>();
     }
@@ -70,16 +69,25 @@ public class Enemy : MonoBehaviour
     {
         CanAttack = false;
 
-        _enemyAttackArea.DetectedCharacter?.TakeDamage(_character.Model.BasePower, GetAttackDirection());
+        bool playerDetected = _enemyAttackArea.DetectedCharacter != null;
+        if (playerDetected)
+        {
+            EventManager.Publish<OnTriggerCombatMessage>(new()
+            {
+                AttackedCharacter = AttackedCharacter.PLAYER,
+                AttackedDirection = GetAttackDirectionFromPlayer(),
+                CombatCharacters = new() { _enemyAttackArea.DetectedCharacter, _enemyCombatant }
+            });
+        }
         _animator.SetTrigger(_attackAnim);
 
-        await UniTask.WaitForSeconds(_character.AttackCooldown);
+        await UniTask.WaitForSeconds(_enemyCombatant.AttackCooldown);
         CanAttack = true;
     }
 
-    private RelativeDirection GetAttackDirection()
+    private RelativeDirection GetAttackDirectionFromPlayer()
     {
-        Character playerCharacter = _enemyAttackArea.DetectedCharacter;
+        Combatant playerCharacter = _enemyAttackArea.DetectedCharacter;
         PlayerController player = playerCharacter.GetComponent<PlayerController>();
         Vector3 playerPosition = playerCharacter.gameObject.transform.position;
         return CharacterDirection.GetRelativePosition(playerPosition, transform.position, player.FacingDirection);

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    private Character _character;
+    private Combatant _playerCombatant;
     private PlayerMovement _playerMovement;
     private PlayerInventory _playerInventory;
     private AttackArea _playerAttackArea;
@@ -20,7 +20,7 @@ public class PlayerController : MonoBehaviour
     {
         _playerMovement = GetComponent<PlayerMovement>();
         _playerInventory = GetComponent<PlayerInventory>();
-        _character = GetComponent<Character>();
+        _playerCombatant = GetComponent<PlayerCombatant>();
         _animator = GetComponent<Animator>();
         _interactableDetection = GetComponentInChildren<InteractableDetection>();
         _playerAttackArea = GetComponentInChildren<AttackArea>();
@@ -46,20 +46,30 @@ public class PlayerController : MonoBehaviour
         CanAttack = false;
         CanMove = false;
 
-        _playerAttackArea.DetectedCharacter?.TakeDamage(_character.Model.BasePower, GetAttackDirection());
+        // DO: Notify CombatManager to switch to combat state
+        bool enemyDetected = _playerAttackArea.DetectedCharacter != null;
+        if (enemyDetected)
+        {
+            EventManager.Publish<OnTriggerCombatMessage>(new()
+            {
+                AttackedCharacter = AttackedCharacter.ENEMY,
+                AttackedDirection = GetAttackDirectionFromEnemy(),
+                CombatCharacters = new() { _playerAttackArea.DetectedCharacter, _playerCombatant }
+            });
+        }
         _animator.SetTrigger(_attackAnim);
 
         await UniTask.WaitForSeconds(0.5f);
         CanMove = true;
 
-        await UniTask.WaitForSeconds(_character.AttackCooldown);
+        await UniTask.WaitForSeconds(_playerCombatant.AttackCooldown);
         CanAttack = true;
     }
 
 
-    private RelativeDirection GetAttackDirection()
+    private RelativeDirection GetAttackDirectionFromEnemy()
     {
-        Character enemyCharacter = _playerAttackArea.DetectedCharacter;
+        Combatant enemyCharacter = _playerAttackArea.DetectedCharacter;
         Enemy enemy = enemyCharacter.gameObject.GetComponent<Enemy>();
         Vector3 enemyPosition = enemyCharacter.gameObject.transform.position;
         return CharacterDirection.GetRelativePosition(enemyPosition, transform.position, enemy.FacingDirection);
