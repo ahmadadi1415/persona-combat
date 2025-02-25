@@ -5,6 +5,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _movementSpeed = 5f;
 
     [field: SerializeField] public bool IsMoving { get; private set; } = false;
+    public Vector2 FacingDirection { get; private set; } = Vector2.zero;
 
     private Vector2 _movement;
     private Rigidbody2D _rigidbody;
@@ -36,6 +37,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (IsMoving)
         {
+            FacingDirection = movement;
             _animator.SetFloat(_lastHorizontalAnim, movement.x);
             _animator.SetFloat(_lastVerticalAnim, movement.y);
         }

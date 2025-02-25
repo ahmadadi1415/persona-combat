@@ -69,15 +69,19 @@ public class Enemy : MonoBehaviour
     private async UniTaskVoid Attack()
     {
         CanAttack = false;
-        CanMove = false;
 
-        _enemyAttackArea.DetectedCharacter?.TakeDamage(_character.Model.BasePower);
+        _enemyAttackArea.DetectedCharacter?.TakeDamage(_character.Model.BasePower, GetAttackDirection());
         _animator.SetTrigger(_attackAnim);
-
-        await UniTask.WaitForSeconds(0.5f);
-        CanMove = true;
 
         await UniTask.WaitForSeconds(_character.AttackCooldown);
         CanAttack = true;
+    }
+
+    private RelativeDirection GetAttackDirection()
+    {
+        Character playerCharacter = _enemyAttackArea.DetectedCharacter;
+        PlayerController player = playerCharacter.GetComponent<PlayerController>();
+        Vector3 playerPosition = playerCharacter.gameObject.transform.position;
+        return CharacterDirection.GetRelativePosition(playerPosition, transform.position, player.FacingDirection);
     }
 }

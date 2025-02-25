@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
     public bool CanAttack { get; private set; } = true;
     public bool CanMove { get; private set; } = true;
     public bool IsAttacking { get; private set; } = false;
+    public Vector2 FacingDirection => _playerMovement.FacingDirection;
     private readonly int _attackAnim = Animator.StringToHash("Attack");
 
     private void Awake()
@@ -45,7 +46,7 @@ public class PlayerController : MonoBehaviour
         CanAttack = false;
         CanMove = false;
 
-        _playerAttackArea.DetectedCharacter?.TakeDamage(_character.Model.BasePower);
+        _playerAttackArea.DetectedCharacter?.TakeDamage(_character.Model.BasePower, GetAttackDirection());
         _animator.SetTrigger(_attackAnim);
 
         await UniTask.WaitForSeconds(0.5f);
@@ -53,5 +54,14 @@ public class PlayerController : MonoBehaviour
 
         await UniTask.WaitForSeconds(_character.AttackCooldown);
         CanAttack = true;
+    }
+
+
+    private RelativeDirection GetAttackDirection()
+    {
+        Character enemyCharacter = _playerAttackArea.DetectedCharacter;
+        Enemy enemy = enemyCharacter.gameObject.GetComponent<Enemy>();
+        Vector3 enemyPosition = enemyCharacter.gameObject.transform.position;
+        return CharacterDirection.GetRelativePosition(enemyPosition, transform.position, enemy.FacingDirection);
     }
 }

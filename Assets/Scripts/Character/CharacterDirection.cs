@@ -5,12 +5,22 @@ public class CharacterDirection
 {
     public static RelativeDirection GetRelativePosition(Vector3 source, Vector3 target, Vector2 sourceDirection)
     {
-        Vector2 directionToTarget = (target - source).normalized;
-        Vector2 playerDirection = GetCardinalDirection(directionToTarget);
+        // Compute normalized direction vector from source to target.
+        Vector2 toTarget = (target - source).normalized;
+        
+        // Compute dot product between facing direction and direction to target.
+        float dot = Vector2.Dot(sourceDirection.normalized, toTarget);
 
-        if (playerDirection == sourceDirection) return RelativeDirection.AHEAD;
-        if (playerDirection == -sourceDirection) return RelativeDirection.BEHIND;
-        return RelativeDirection.ONSIDE;
+        // Define thresholds: 
+        // If the angle is less than ~45° (dot > 0.707) -> AHEAD.
+        // If the angle is more than ~135° (dot < -0.707) -> BEHIND.
+        // Otherwise, the target is roughly on the side.
+        if (dot >= 0.707f)
+            return RelativeDirection.AHEAD;
+        else if (dot <= -0.707f)
+            return RelativeDirection.BEHIND;
+        else
+            return RelativeDirection.ONSIDE;
     }
 
     private static Vector2 GetCardinalDirection(Vector2 direction)
