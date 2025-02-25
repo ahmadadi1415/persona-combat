@@ -1,9 +1,41 @@
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 
-public class PlayerCombatant : Combatant {
-    public override UniTask<MoveData> GetMoveDataAsync()
+public class PlayerCombatant : Combatant
+{
+    private MoveData PlayerMove = null;
+
+    private void OnEnable()
+    {
+        EventManager.Subscribe<OnPlayerMoveChoosenMessage>(OnPlayerMoveChoosen);
+    }
+
+    private void OnDisable()
+    {
+        EventManager.Unsubscribe<OnPlayerMoveChoosenMessage>(OnPlayerMoveChoosen);
+    }
+
+    private void OnPlayerMoveChoosen(OnPlayerMoveChoosenMessage message)
+    {
+        PlayerMove = message.Move;
+    }
+
+    public override async UniTask<MoveData> GetMoveDataAsync()
     {
         // DO: Wait from player input
-        return base.GetMoveDataAsync();
+        try
+        {
+            await UniTask.WaitUntil(() => PlayerMove != null);
+            return PlayerMove;
+        }
+        catch (System.Exception)
+        {
+            Debug.Log("Error UniTask");
+            return null;
+        }
+        finally {
+            // DO: Reset player move after the move is sent
+            PlayerMove = null;
+        }
     }
 }

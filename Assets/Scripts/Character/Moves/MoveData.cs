@@ -6,5 +6,5 @@ public class MoveData
     public MoveType MoveType;
     
     // Power in percentage, 0.1, 1, 1.5
-    public int Power;
+    public float Power;
 }

@@ -13,8 +13,10 @@ public interface ICombatant
 
     public float CurrentSpeed => Speed * SpeedModifier;
     public void TakeDamage(int damage);
-    public void SetSpeedModifier(float speedModifier);
+    public void Heal(int heal);
+    public void BuffSpeed(float buffSpeedPercentage);
+    public void BuffDefense(float buffDefensePercentage);
 
     public UniTask<MoveData> GetMoveDataAsync();
-    public void ExecuteMove(MoveData moveData, ICombatant target);
+    public void ExecuteMove(MoveData moveData, ICombatant combatant, ICombatant target);
 }

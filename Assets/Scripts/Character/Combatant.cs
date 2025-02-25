@@ -13,8 +13,12 @@ public class Combatant : MonoBehaviour, ICombatant
     [field: SerializeField] public int Defense { get; private set; }
     [field: SerializeField] public float SpeedModifier { get; private set; }
 
+    protected Animator _animator;
+    private readonly int _attackAnim = Animator.StringToHash("Attack");
+
     private void Awake()
     {
+        _animator = GetComponent<Animator>();
         Health = stats.BaseHealth;
         Name = stats.Name;
         ResetAttributes();
@@ -27,7 +31,12 @@ public class Combatant : MonoBehaviour, ICombatant
         Defense = stats.BaseDefense;
     }
 
-    public void SetSpeedModifier(float speedModifier)
+    public void PerformAttack()
+    {
+        _animator.SetTrigger(_attackAnim);
+    }
+
+    public void BuffSpeed(float speedModifier)
     {
         if (speedModifier == 0) return;
         SpeedModifier = speedModifier;
@@ -39,18 +48,43 @@ public class Combatant : MonoBehaviour, ICombatant
         Health -= damageTaken;
     }
 
-    public void BuffDefense(int defense)
+    public void Heal(int heal)
     {
-        Defense += defense;
+        if (Health == stats.BaseHealth || Health <= 0) return;
+
+        Health += heal;
     }
 
-    public virtual async UniTask<MoveData> GetMoveDataAsync()
+    public void BuffDefense(float buffDefensePercentage)
     {
-        return new();
+        Defense += Mathf.FloorToInt(stats.BaseDefense * buffDefensePercentage);
     }
 
-    public void ExecuteMove(MoveData moveData, ICombatant target)
+    public virtual async UniTask<MoveData> GetMoveDataAsync() { return null; }
+
+    public void ExecuteMove(MoveData moveData, ICombatant combatant, ICombatant target)
     {
-        throw new System.NotImplementedException();
+        switch (moveData.MoveType)
+        {
+            case MoveType.ATTACK:
+                PerformAttack();
+                target.TakeDamage(Mathf.FloorToInt(moveData.Power * combatant.Power));
+                break;
+            case MoveType.DEFEND:
+                combatant.BuffDefense(moveData.Power);
+                break;
+            case MoveType.SPELL:
+                combatant.Heal((int)moveData.Power);
+                break;
+            case MoveType.RUN:
+                // DO: Notify CombatManager to stop combating
+                NotifyRunFromCombat();
+                break;
+        }
+    }
+
+    private void NotifyRunFromCombat()
+    {
+        EventManager.Publish<OnCombatRunMessage>(new());
     }
 }

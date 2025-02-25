@@ -5,5 +5,5 @@ public struct OnTriggerCombatMessage
 {
     public RelativeDirection AttackedDirection;
     public AttackedCharacter AttackedCharacter;
-    public List<Combatant> CombatCharacters;
+    public List<ICombatant> CombatCharacters;
 }
