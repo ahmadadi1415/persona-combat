@@ -24,18 +24,23 @@ public class Combatant : MonoBehaviour, ICombatant
         ResetAttributes();
     }
 
-    private void OnEnable() {
-        EventManager.Subscribe<OnCombatEndedMessage>(OnCombatEnded);
+    private void OnEnable()
+    {
+        EventManager.Subscribe<OnBattlingCombatMessage>(OnCombatEnded);
     }
 
-    private void OnDisable() {
-        EventManager.Unsubscribe<OnCombatEndedMessage>(OnCombatEnded);
+    private void OnDisable()
+    {
+        EventManager.Unsubscribe<OnBattlingCombatMessage>(OnCombatEnded);
     }
 
-    private void OnCombatEnded(OnCombatEndedMessage message)
+    private void OnCombatEnded(OnBattlingCombatMessage message)
     {
         // DO: Reset speed modifier
-        SpeedModifier = 1;
+        if (message.State == CombatState.END)
+        {
+            SpeedModifier = 1;
+        }
     }
 
     private void ResetAttributes()

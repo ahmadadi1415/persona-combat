@@ -15,7 +15,7 @@ public class CombatManager : MonoBehaviour
 
     private ICombatant playerCombatant, enemyCombatant;
     public ICombatant ActiveCombatant { get; private set; } = null;
-    
+
     private void OnEnable()
     {
         EventManager.Subscribe<OnTriggerCombatMessage>(OnTriggerCombat);
@@ -37,6 +37,7 @@ public class CombatManager : MonoBehaviour
     {
         if (IsCombating) return;
 
+
         CurrentState = CombatState.INITIALIZATION;
         IsCombating = true;
 
@@ -54,6 +55,8 @@ public class CombatManager : MonoBehaviour
         combatants = message.CombatCharacters.OrderByDescending(combatant => combatant.Speed).ToList();
 
         AdjustCombatStatus();
+        NotifyBattlingCombatState();
+
         StartCombat().Forget();
     }
 
@@ -107,13 +110,13 @@ public class CombatManager : MonoBehaviour
 
     private void NotifyBattlingCombatState()
     {
-        EventManager.Publish<OnBattlingCombatMessage>(new() { PlayerCombatant = playerCombatant, EnemyCombatant = enemyCombatant });
+        EventManager.Publish<OnBattlingCombatMessage>(new() { PlayerCombatant = playerCombatant, EnemyCombatant = enemyCombatant, State = CurrentState });
     }
 
     private void EndCombat()
     {
         IsCombating = false;
         CurrentState = CombatState.END;
-        EventManager.Publish<OnCombatEndedMessage>(new());
+        NotifyBattlingCombatState();
     }
 }

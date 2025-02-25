@@ -9,14 +9,12 @@ public class PlayerStatsUIController : MonoBehaviour
 
     private void OnEnable()
     {
-        EventManager.Subscribe<OnTriggerCombatMessage>(OnCombatTriggered);
         EventManager.Subscribe<OnBattlingCombatMessage>(OnBattlingCombat);
     }
 
 
     private void OnDisable()
     {
-        EventManager.Unsubscribe<OnTriggerCombatMessage>(OnCombatTriggered);
         EventManager.Unsubscribe<OnBattlingCombatMessage>(OnBattlingCombat);
     }
 

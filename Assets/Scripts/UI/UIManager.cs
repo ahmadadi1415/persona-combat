@@ -26,23 +26,16 @@ public class UIManager : MonoBehaviour
 
     private void OnEnable()
     {
-        EventManager.Subscribe<OnTriggerCombatMessage>(OnCombatTriggered);
-        EventManager.Subscribe<OnCombatEndedMessage>(OnCombatEnded);
+        EventManager.Subscribe<OnBattlingCombatMessage>(OnCombatBattling);
     }
 
     void OnDisable()
     {
-        EventManager.Unsubscribe<OnTriggerCombatMessage>(OnCombatTriggered);
-        EventManager.Unsubscribe<OnCombatEndedMessage>(OnCombatEnded);
+        EventManager.Subscribe<OnBattlingCombatMessage>(OnCombatBattling);
     }
 
-    private void OnCombatTriggered(OnTriggerCombatMessage message)
+    private void OnCombatBattling(OnBattlingCombatMessage message)
     {
-        _combatCanvas.alpha = 1f;
-    }
-    
-    private void OnCombatEnded(OnCombatEndedMessage message)
-    {
-        _combatCanvas.alpha = 0f;
+        _combatCanvas.alpha = message.State == CombatState.END ? 0f : 1f;
     }
 }
