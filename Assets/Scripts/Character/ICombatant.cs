@@ -1,6 +1,8 @@
 
 using Cysharp.Threading.Tasks;
 
+public enum CombatantState { NORMAL, DEFEND }
+
 public interface ICombatant
 {
     public string Name { get; }
@@ -9,7 +11,8 @@ public interface ICombatant
     public int Speed { get; }
     public int Power { get; }
     public int Defense { get; }
-    public float SpeedModifier { get; }
+    public float SpeedModifier { get; } 
+    public CombatantState State { get; }
 
     public float CurrentSpeed => Speed * SpeedModifier;
     public void TakeDamage(int damage);

@@ -12,6 +12,7 @@ public class Combatant : MonoBehaviour, ICombatant
     [field: SerializeField] public int Power { get; private set; }
     [field: SerializeField] public int Defense { get; private set; }
     [field: SerializeField] public float SpeedModifier { get; private set; } = 1;
+    [field: SerializeField] public CombatantState State { get; private set; } = CombatantState.NORMAL;
 
     protected Animator _animator;
     private readonly int _attackAnim = Animator.StringToHash("Attack");
@@ -65,7 +66,13 @@ public class Combatant : MonoBehaviour, ICombatant
     public void TakeDamage(int damage)
     {
         if (Health <= 0) return;
-        int damageTaken = Mathf.Clamp(damage - Defense, 1, damage);
+
+        int damageTaken = damage;
+        if (State == CombatantState.DEFEND)
+        {
+            damageTaken = (100 - Defense) / 100 * damageTaken;
+        }
+        
         Health -= damageTaken;
     }
 
@@ -92,7 +99,7 @@ public class Combatant : MonoBehaviour, ICombatant
                 target.TakeDamage((int)(moveData.Power * Power));
                 break;
             case MoveType.DEFEND:
-                BuffDefense(moveData.Power);
+
                 break;
             case MoveType.SPELL:
                 Heal((int)moveData.Power);

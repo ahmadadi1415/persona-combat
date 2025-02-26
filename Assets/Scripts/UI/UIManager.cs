@@ -28,11 +28,13 @@ public class UIManager : MonoBehaviour
     private void OnEnable()
     {
         EventManager.Subscribe<OnBattlingCombatMessage>(OnCombatBattling);
+        EventManager.Subscribe<OnGameStateChangedMessage>(OnGameStateChanged);
     }
 
     void OnDisable()
     {
-        EventManager.Subscribe<OnBattlingCombatMessage>(OnCombatBattling);
+        EventManager.Unsubscribe<OnBattlingCombatMessage>(OnCombatBattling);
+        EventManager.Unsubscribe<OnGameStateChangedMessage>(OnGameStateChanged);
     }
 
     private void OnCombatBattling(OnBattlingCombatMessage message)
@@ -40,13 +42,18 @@ public class UIManager : MonoBehaviour
         _combatCanvas.alpha = message.State == CombatState.END ? 0f : 1f;
     }
 
-    private void OnGameOver()
+    private void OnGameStateChanged(OnGameStateChangedMessage message)
     {
-        _gameOverCanvas.alpha = 1f;
-    }
-
-    private void OnGameStarted()
-    {
-        _gameOverCanvas.alpha = 0f;
+        switch (message.CurrentGameState)
+        {
+            case GameState.LOSE:
+                _gameOverCanvas.alpha = 1f;
+                break;
+            case GameState.PLAYING:
+                _gameOverCanvas.alpha = 0f;
+                break;
+            default:
+                break;
+        }
     }
 }
