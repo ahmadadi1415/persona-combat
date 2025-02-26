@@ -7,6 +7,7 @@ public class Enemy : MonoBehaviour
     private AttackArea _enemyAttackArea;
     private Animator _animator;
 
+    public bool IsCombating { get; private set; } = false;
     public bool CanAttack { get; private set; } = true;
     public bool CanMove { get; private set; } = true;
     public bool IsAttacking { get; private set; } = false;
@@ -23,6 +24,20 @@ public class Enemy : MonoBehaviour
         _enemyAttackArea = GetComponentInChildren<AttackArea>();
     }
 
+    private void OnEnable()
+    {
+        EventManager.Subscribe<OnTriggerCombatMessage>(OnCombatTriggered);
+        EventManager.Subscribe<OnCombatFinishedMessage>(OnBattlingCombat);
+    }
+
+    private void OnDisable()
+    {
+        EventManager.Unsubscribe<OnTriggerCombatMessage>(OnCombatTriggered);
+        EventManager.Unsubscribe<OnCombatFinishedMessage>(OnBattlingCombat);
+
+    }
+
+
     private void Start()
     {
         RandomizeFacingDirection().Forget();
@@ -36,9 +51,33 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    private void OnCombatTriggered(OnTriggerCombatMessage message)
+    {
+        if (!message.CombatCharacters.Contains(_enemyCombatant)) return;
+
+        IsCombating = true;
+    }
+
+    private void OnBattlingCombat(OnCombatFinishedMessage message)
+    {
+        if (!IsCombating) return;
+
+        IsCombating = false;
+
+        switch (message.Result)
+        {
+            case CombatResult.PLAYER_WIN:
+                gameObject.SetActive(false);
+                break;
+            case CombatResult.PLAYER_FLEE:
+                RandomizeFacingDirection().Forget();
+                break;
+        }   
+    }
+
     private async UniTaskVoid RandomizeFacingDirection()
     {
-        while (true)
+        while (true && !IsCombating)
         {
             await UniTask.WaitForSeconds(3f);
             ChangeDirection();

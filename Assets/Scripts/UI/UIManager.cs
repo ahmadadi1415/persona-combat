@@ -48,9 +48,11 @@ public class UIManager : MonoBehaviour
         {
             case GameState.LOSE:
                 _gameOverCanvas.alpha = 1f;
+                _gameOverCanvas.gameObject.SetActive(true);
                 break;
             case GameState.PLAYING:
                 _gameOverCanvas.alpha = 0f;
+                _gameOverCanvas.gameObject.SetActive(false);
                 break;
             default:
                 break;

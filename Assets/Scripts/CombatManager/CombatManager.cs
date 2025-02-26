@@ -5,7 +5,7 @@ using UnityEngine;
 
 public enum CombatType { NORMAL, ADVANTAGE, AMBUSH }
 public enum CombatState { INITIALIZATION, BATTLING, END }
-public enum CombatResult { WIN, LOSE, FLEE }
+public enum CombatResult { PLAYER_WIN, PLAYER_LOSE, PLAYER_FLEE }
 
 public class CombatManager : MonoBehaviour
 {
@@ -108,20 +108,20 @@ public class CombatManager : MonoBehaviour
                 if (!playerCombatant.IsAlive)
                 {
                     // DO: Notify GameManager, the game ended, player lose
-                    EventManager.Publish<OnCombatFinishedMessage>(new() { Result = CombatResult.LOSE });
+                    EventManager.Publish<OnCombatFinishedMessage>(new() { Result = CombatResult.PLAYER_LOSE });
                     break;
                 }
                 // DO: Check is enemy died
                 else if (!enemyCombatant.IsAlive)
                 {
                     // DO: Back to combat exploring, deactivate the enemy object
-                    EventManager.Publish<OnCombatFinishedMessage>(new() { Result = CombatResult.WIN });
+                    EventManager.Publish<OnCombatFinishedMessage>(new() { Result = CombatResult.PLAYER_WIN });
                     break;
                 }
                 // DO: Both is alive but the combat over, player flee
                 else
                 {
-                    EventManager.Publish<OnCombatFinishedMessage>(new() { Result = CombatResult.FLEE });
+                    EventManager.Publish<OnCombatFinishedMessage>(new() { Result = CombatResult.PLAYER_FLEE });
                     break;
                 }
             }

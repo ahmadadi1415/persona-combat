@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameOverUIController : MonoBehaviour
@@ -17,6 +18,7 @@ public class GameOverUIController : MonoBehaviour
     private void OnRetryButtonClicked()
     {
         // DO: Back to exploration scene
+        SceneManager.LoadScene("Exploration");
     }
 
     private void OnQuitButtonClicked()

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Zenject;
 
 public class InputManager : MonoBehaviour
 {
@@ -9,6 +10,13 @@ public class InputManager : MonoBehaviour
 
     private PlayerInput _playerInput;
     private InputAction _moveAction, _interactAction, _attackAction;
+    private GameManager _gameManager;
+
+    [Inject]
+    private void Construct(GameManager gameManager)
+    {
+        _gameManager = gameManager;
+    }
 
     private void Awake()
     {
@@ -20,6 +28,8 @@ public class InputManager : MonoBehaviour
 
     void Update()
     {
+        if (_gameManager.CurrentPlayerState == PlayerState.COMBAT || _gameManager.CurrentGameState != GameState.PLAYING) return;
+
         Movement = _moveAction.ReadValue<Vector2>();
         InteractPressed = _interactAction.WasPressedThisFrame();
         AttackPressed = _attackAction.WasPressedThisFrame();
