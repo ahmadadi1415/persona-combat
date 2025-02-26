@@ -1,28 +1,18 @@
-using System;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
     [SerializeField] private CanvasGroup _explorationCanvas, _combatCanvas, _gameOverCanvas;
-    public static UIManager Instance { get; private set; }
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(this);
-        }
-        else
-        {
-            Instance = this;
-            DontDestroyOnLoad(this);
-            Init();
-        }
+        Init();
     }
 
     private void Init()
     {
         _combatCanvas.alpha = 0f;
         _gameOverCanvas.alpha = 0f;
+        _gameOverCanvas.gameObject.SetActive(false);
     }
 
     private void OnEnable()

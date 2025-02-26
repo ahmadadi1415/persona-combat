@@ -57,6 +57,21 @@ public class Combatant : MonoBehaviour, ICombatant
         _animator.SetTrigger(_attackAnim);
     }
 
+    public void PerformDefend()
+    {
+        LeanTween.scaleX(gameObject, 2f, 0.5f).setEase(LeanTweenType.easeInOutSine)
+            .setOnComplete(() =>
+            {
+                LeanTween.scaleX(gameObject, 1f, 0.5f).setEase(LeanTweenType.easeInOutSine);
+            });
+    }
+
+    public void PerformSpell()
+    {
+        LeanTween.rotateY(gameObject, 360f, 0.5f)
+            .setEase(LeanTweenType.easeInOutSine);
+    }
+
     public void BuffSpeed(float speedModifier)
     {
         if (speedModifier == 0) return;
@@ -72,7 +87,7 @@ public class Combatant : MonoBehaviour, ICombatant
         {
             damageTaken = (100 - Defense) / 100 * damageTaken;
         }
-        
+
         Health -= damageTaken;
     }
 
@@ -99,10 +114,11 @@ public class Combatant : MonoBehaviour, ICombatant
                 target.TakeDamage((int)(moveData.Power * Power));
                 break;
             case MoveType.DEFEND:
-
+                PerformDefend();
                 break;
             case MoveType.SPELL:
                 Heal((int)moveData.Power);
+                PerformSpell();
                 break;
             case MoveType.RUN:
                 // DO: Notify CombatManager to stop combating
