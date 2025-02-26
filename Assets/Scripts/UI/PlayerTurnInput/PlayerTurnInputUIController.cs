@@ -18,6 +18,22 @@ public class PlayerTurnInputUIController : MonoBehaviour
         _runButton.onClick.AddListener(OnRunButtonClicked);
     }
 
+    private void OnEnable() {
+        EventManager.Subscribe<OnWaitingPlayerTurnInputMessage>(OnWaitingPlayerTurnInput);
+    }
+
+    private void OnDisable() {
+        EventManager.Unsubscribe<OnWaitingPlayerTurnInputMessage>(OnWaitingPlayerTurnInput);
+    }
+
+    private void OnWaitingPlayerTurnInput(OnWaitingPlayerTurnInputMessage message)
+    {
+        _attackButton.interactable = message.IsTurnInputAllowed;
+        _defendButton.interactable = message.IsTurnInputAllowed;
+        _spellButton.interactable = message.IsTurnInputAllowed;
+        _runButton.interactable = message.IsTurnInputAllowed;
+    }
+
     private void OnAttackButtonClicked()
     {
         // DO: Notify the PlayerCombatant to set the attack move

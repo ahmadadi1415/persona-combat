@@ -5,6 +5,8 @@ using UnityEngine;
 
 public enum CombatType { NORMAL, ADVANTAGE, AMBUSH }
 public enum CombatState { INITIALIZATION, BATTLING, END }
+public enum CombatResult { WIN, LOSE, FLEE }
+
 public class CombatManager : MonoBehaviour
 {
     [SerializeField] private List<ICombatant> combatants = new();
@@ -100,7 +102,29 @@ public class CombatManager : MonoBehaviour
             activeCombatant.ExecuteMove(move, target);
 
             NotifyBattlingCombatState();
-            if (IsCombatOver()) break;
+            if (IsCombatOver())
+            {
+                // DO: Check is player died
+                if (!playerCombatant.IsAlive)
+                {
+                    // DO: Notify GameManager, the game ended, player lose
+                    EventManager.Publish<OnCombatFinishedMessage>(new() { Result = CombatResult.LOSE });
+                    break;
+                }
+                // DO: Check is enemy died
+                else if (!enemyCombatant.IsAlive)
+                {
+                    // DO: Back to combat exploring, deactivate the enemy object
+                    EventManager.Publish<OnCombatFinishedMessage>(new() { Result = CombatResult.WIN });
+                    break;
+                }
+                // DO: Both is alive but the combat over, player flee
+                else
+                {
+                    EventManager.Publish<OnCombatFinishedMessage>(new() { Result = CombatResult.FLEE });
+                    break;
+                }
+            }
 
             currentTurnIndex = (currentTurnIndex + 1) % combatants.Count;
         }
@@ -118,5 +142,7 @@ public class CombatManager : MonoBehaviour
         IsCombating = false;
         CurrentState = CombatState.END;
         NotifyBattlingCombatState();
+        enemyCombatant = null;
+        playerCombatant = null;
     }
 }

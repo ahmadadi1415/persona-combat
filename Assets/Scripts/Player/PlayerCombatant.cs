@@ -25,7 +25,15 @@ public class PlayerCombatant : Combatant
         // DO: Wait from player input
         try
         {
+            // DO: Notify PlayerTurnInput to allow player input
+            EventManager.Publish<OnWaitingPlayerTurnInputMessage>(new() { IsTurnInputAllowed = true });
+
             await UniTask.WaitUntil(() => PlayerMove != null);
+            
+            // DO: Notify PlayerTurnInput to disallow player input
+            EventManager.Publish<OnWaitingPlayerTurnInputMessage>(new() { IsTurnInputAllowed = false });
+
+            await UniTask.WaitForSeconds(1f);
             return PlayerMove;
         }
         catch (System.Exception)
@@ -33,7 +41,8 @@ public class PlayerCombatant : Combatant
             Debug.Log("Error UniTask");
             return null;
         }
-        finally {
+        finally
+        {
             // DO: Reset player move after the move is sent
             PlayerMove = null;
         }
