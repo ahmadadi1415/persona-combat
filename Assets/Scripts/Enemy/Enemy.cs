@@ -12,10 +12,6 @@ public class Enemy : MonoBehaviour
     public bool CanMove { get; private set; } = true;
     public bool IsAttacking { get; private set; } = false;
     [field: SerializeField] public Vector2 FacingDirection { get; private set; } = Vector2.down;
-    private readonly int _attackAnim = Animator.StringToHash("Attack");
-    private readonly int _lastVerticalAnim = Animator.StringToHash("LastVertical");
-    private readonly int _lastHorizontalAnim = Animator.StringToHash("LastHorizontal");
-
 
     private void Awake()
     {
@@ -34,7 +30,6 @@ public class Enemy : MonoBehaviour
     {
         EventManager.Unsubscribe<OnTriggerCombatMessage>(OnCombatTriggered);
         EventManager.Unsubscribe<OnCombatFinishedMessage>(OnBattlingCombat);
-
     }
 
 
@@ -45,7 +40,7 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-        if (CanAttack && IsPlayerAhead())
+        if (CanAttack && !IsCombating && IsPlayerAhead())
         {
             Attack().Forget();
         }
@@ -72,7 +67,7 @@ public class Enemy : MonoBehaviour
             case CombatResult.PLAYER_FLEE:
                 RandomizeFacingDirection().Forget();
                 break;
-        }   
+        }
     }
 
     private async UniTaskVoid RandomizeFacingDirection()
@@ -100,8 +95,8 @@ public class Enemy : MonoBehaviour
         Vector2[] possibleDirections = { Vector2.right, Vector2.left, Vector2.up, Vector2.down };
         FacingDirection = possibleDirections[Random.Range(0, possibleDirections.Length)];
 
-        _animator.SetFloat(_lastHorizontalAnim, FacingDirection.x);
-        _animator.SetFloat(_lastVerticalAnim, FacingDirection.y);
+        _animator.SetFloat(AnimationStrings.ANIM_MOVEMENT_LAST_HORIZONTAL, FacingDirection.x);
+        _animator.SetFloat(AnimationStrings.ANIM_MOVEMENT_LAST_VERTICAL, FacingDirection.y);
     }
 
     private async UniTaskVoid Attack()
@@ -118,7 +113,7 @@ public class Enemy : MonoBehaviour
                 CombatCharacters = new() { _enemyAttackArea.DetectedCharacter, _enemyCombatant }
             });
         }
-        _animator.SetTrigger(_attackAnim);
+        _animator.SetTrigger(AnimationStrings.ANIM_ATTACK);
 
         await UniTask.WaitForSeconds(_enemyCombatant.AttackCooldown);
         CanAttack = true;

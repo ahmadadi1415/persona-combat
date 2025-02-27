@@ -7,7 +7,7 @@ public class CharacterDirection
     {
         // Compute normalized direction vector from source to target.
         Vector2 toTarget = (target - source).normalized;
-        
+
         // Compute dot product between facing direction and direction to target.
         float dot = Vector2.Dot(sourceDirection.normalized, toTarget);
 
@@ -29,5 +29,11 @@ public class CharacterDirection
             return new Vector2(Mathf.Sign(direction.x), 0); // Face Left (-1,0) or Right (1,0)
         else
             return new Vector2(0, Mathf.Sign(direction.y)); // Face Up (0,1) or Down (0,-1)
+    }
+
+    public static Vector2 GetFacingDirectionToTarget(Vector3 source, Vector3 target)
+    {
+        Vector2 toTarget = (target - source).normalized;
+        return GetCardinalDirection(toTarget);
     }
 }

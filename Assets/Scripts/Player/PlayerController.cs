@@ -14,7 +14,6 @@ public class PlayerController : MonoBehaviour
     public bool CanMove { get; private set; } = true;
     public bool IsAttacking { get; private set; } = false;
     public Vector2 FacingDirection => _playerMovement.FacingDirection;
-    private readonly int _attackAnim = Animator.StringToHash("Attack");
 
     private void Awake()
     {
@@ -24,6 +23,15 @@ public class PlayerController : MonoBehaviour
         _animator = GetComponent<Animator>();
         _interactableDetection = GetComponentInChildren<InteractableDetection>();
         _playerAttackArea = GetComponentInChildren<AttackArea>();
+    }
+    private void OnEnable()
+    {
+        EventManager.Subscribe<OnTriggerCombatMessage>(OnCombatTriggered);
+    }
+
+    private void OnDisable()
+    {
+        EventManager.Unsubscribe<OnTriggerCombatMessage>(OnCombatTriggered);
     }
 
     private void Update()
@@ -41,6 +49,12 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void OnCombatTriggered(OnTriggerCombatMessage message)
+    {
+        if (!message.CombatCharacters.Contains(_playerCombatant)) return;
+    }
+
+
     private async UniTaskVoid Attack()
     {
         CanAttack = false;
@@ -57,7 +71,7 @@ public class PlayerController : MonoBehaviour
                 CombatCharacters = new() { _playerAttackArea.DetectedCharacter, _playerCombatant }
             });
         }
-        _animator.SetTrigger(_attackAnim);
+        _animator.SetTrigger(AnimationStrings.ANIM_ATTACK);
 
         await UniTask.WaitForSeconds(0.5f);
         CanMove = true;
