@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public enum MoveType { ATTACK, DEFEND, SPELL, RUN }
 public class MoveData
 {

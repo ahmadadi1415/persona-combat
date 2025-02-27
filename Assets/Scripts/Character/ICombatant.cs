@@ -11,8 +11,9 @@ public interface ICombatant
     public int Speed { get; }
     public int Power { get; }
     public int Defense { get; }
-    public float SpeedModifier { get; } 
+    public float SpeedModifier { get; }
     public CombatantState State { get; }
+    public bool IsMoveReady { get; }
 
     public float CurrentSpeed => Speed * SpeedModifier;
     public void TakeDamage(int damage);

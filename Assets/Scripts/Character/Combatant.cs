@@ -13,6 +13,7 @@ public class Combatant : MonoBehaviour, ICombatant
     [field: SerializeField] public int Defense { get; private set; }
     [field: SerializeField] public float SpeedModifier { get; private set; } = 1;
     [field: SerializeField] public CombatantState State { get; private set; } = CombatantState.NORMAL;
+    [field: SerializeField] public bool IsMoveReady { get; protected set; } = false;
 
     protected Animator _animator;
     private readonly int _attackAnim = Animator.StringToHash("Attack");
@@ -68,8 +69,12 @@ public class Combatant : MonoBehaviour, ICombatant
 
     public void PerformSpell()
     {
-        LeanTween.rotateY(gameObject, 360f, 0.5f)
-            .setEase(LeanTweenType.easeInOutSine);
+        LeanTween.rotateY(gameObject, 180f, 0.5f)
+            .setEase(LeanTweenType.easeInOutSine)
+            .setOnComplete(() =>
+            {
+                LeanTween.rotateY(gameObject, 360, 0.5f).setEase(LeanTweenType.easeInOutSine);
+            });
     }
 
     public void BuffSpeed(float speedModifier)

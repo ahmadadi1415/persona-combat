@@ -18,6 +18,7 @@ public class PlayerCombatant : Combatant
     private void OnPlayerMoveChoosen(OnPlayerMoveChoosenMessage message)
     {
         PlayerMove = message.Move;
+        IsMoveReady = true;
     }
 
     public override async UniTask<MoveData> GetMoveDataAsync()
@@ -25,14 +26,7 @@ public class PlayerCombatant : Combatant
         // DO: Wait from player input
         try
         {
-            // DO: Notify PlayerTurnInput to allow player input
-            EventManager.Publish<OnWaitingPlayerTurnInputMessage>(new() { IsTurnInputAllowed = true });
-
             await UniTask.WaitUntil(() => PlayerMove != null);
-            
-            // DO: Notify PlayerTurnInput to disallow player input
-            EventManager.Publish<OnWaitingPlayerTurnInputMessage>(new() { IsTurnInputAllowed = false });
-
             await UniTask.WaitForSeconds(1f);
             return PlayerMove;
         }
@@ -45,6 +39,7 @@ public class PlayerCombatant : Combatant
         {
             // DO: Reset player move after the move is sent
             PlayerMove = null;
+            IsMoveReady = false;
         }
     }
 }

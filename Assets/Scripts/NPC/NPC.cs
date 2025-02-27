@@ -13,14 +13,12 @@ public class NPC : MonoBehaviour, IInteractable
     public void OnTriggerEnter()
     {
         // DO: Show Bubble Box
-        Debug.Log("NPC is nearby");
         _bubble.SetActive(true);
     }
 
     public void OnTriggerExit()
     {
         // DO: Hide Bubble Box
-        Debug.Log("NPC cant be interacted");
         _bubble.SetActive(false);
     }
 }

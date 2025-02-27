@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public enum PlayerState { EXPLORATION, COMBAT }
@@ -23,9 +22,10 @@ public class GameManager : MonoBehaviour
 
     private void OnCombatBattling(OnBattlingCombatMessage message)
     {
+        Debug.Log($"Combat State: {message.State}");
         switch (message.State)
         {
-            case CombatState.INITIALIZATION | CombatState.BATTLING:
+            case CombatState.INITIALIZATION or CombatState.BATTLING:
                 CurrentPlayerState = PlayerState.COMBAT;
                 break;
             case CombatState.END:

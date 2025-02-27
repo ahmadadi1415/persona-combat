@@ -14,6 +14,7 @@ public class CombatManager : MonoBehaviour
     [field: SerializeField] public CombatType CombatType { get; private set; } = CombatType.NORMAL;
     [field: SerializeField] public CombatState CurrentState { get; private set; } = CombatState.END;
     private int currentTurnIndex = 0;
+    [SerializeField] private int turnCount = 0;
 
     private ICombatant playerCombatant, enemyCombatant;
     public ICombatant ActiveCombatant { get; private set; } = null;
@@ -39,7 +40,6 @@ public class CombatManager : MonoBehaviour
     {
         if (IsCombating) return;
 
-
         CurrentState = CombatState.INITIALIZATION;
         IsCombating = true;
 
@@ -55,6 +55,11 @@ public class CombatManager : MonoBehaviour
         }
 
         combatants = message.CombatCharacters.OrderByDescending(combatant => combatant.Speed).ToList();
+
+        foreach (var combatant in combatants)
+        {
+            Debug.Log($"Turn: {combatant.Name}");
+        }
 
         AdjustCombatStatus();
         NotifyBattlingCombatState();
@@ -93,6 +98,17 @@ public class CombatManager : MonoBehaviour
 
         while (!IsCombatOver())
         {
+            if (turnCount % 2 == 0)
+            {
+                // DO: Notify PlayerTurnInput to allow player input
+                EventManager.Publish<OnWaitingPlayerTurnInputMessage>(new() { IsTurnInputAllowed = true });
+
+                await UniTask.WaitUntil(() => playerCombatant.IsMoveReady);
+
+                // DO: Notify PlayerTurnInput to disallow player input
+                EventManager.Publish<OnWaitingPlayerTurnInputMessage>(new() { IsTurnInputAllowed = false });
+            }
+
             ICombatant activeCombatant = combatants[currentTurnIndex];
             Debug.Log($"Active Combatant: {activeCombatant.Name}");
 
@@ -127,6 +143,7 @@ public class CombatManager : MonoBehaviour
             }
 
             currentTurnIndex = (currentTurnIndex + 1) % combatants.Count;
+            turnCount++;
         }
 
         EndCombat();

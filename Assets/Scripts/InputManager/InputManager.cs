@@ -28,10 +28,18 @@ public class InputManager : MonoBehaviour
 
     void Update()
     {
-        if (_gameManager.CurrentPlayerState == PlayerState.COMBAT || _gameManager.CurrentGameState != GameState.PLAYING) return;
+        if (_gameManager.CurrentPlayerState == PlayerState.COMBAT || _gameManager.CurrentGameState != GameState.PLAYING)
+        {
+            Movement = Vector2.zero;
+            InteractPressed = false;
+            AttackPressed = false;
+        }
+        else
+        {
+            Movement = _moveAction.ReadValue<Vector2>();
+            InteractPressed = _interactAction.WasPressedThisFrame();
+            AttackPressed = _attackAction.WasPressedThisFrame();
+        }
 
-        Movement = _moveAction.ReadValue<Vector2>();
-        InteractPressed = _interactAction.WasPressedThisFrame();
-        AttackPressed = _attackAction.WasPressedThisFrame();
     }
 }

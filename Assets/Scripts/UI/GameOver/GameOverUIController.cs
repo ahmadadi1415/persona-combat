@@ -24,5 +24,11 @@ public class GameOverUIController : MonoBehaviour
     private void OnQuitButtonClicked()
     {
         // DO: Exit
+        #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+        #else
+        // If running in a built application
+        Application.Quit();
+        #endif
     }
 }

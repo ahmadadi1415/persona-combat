@@ -7,6 +7,7 @@ public class EnemyCombatant : Combatant
     {
         // DO: Eligible moves are spell and attack
         await UniTask.WaitForSeconds(2);
+        IsMoveReady = true;
 
         MoveData attackMove = new()
         {
