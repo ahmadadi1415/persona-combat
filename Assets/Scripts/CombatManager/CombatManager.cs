@@ -66,10 +66,12 @@ public class CombatManager : MonoBehaviour
         }
 
         AdjustCombatStatus(playerCombatant, message.AttackedCombatant);
-        return;
 
+        List<ICombatant> enemies = combatants.Where(combatant => combatant.Name != "Player").ToList();
+        EventManager.Publish<OnCombatStartedMessage>(new() { player = playerCombatant, enemies = enemies });
         NotifyBattlingCombatState();
-
+        
+        return;
         StartCombat().Forget();
     }
 
@@ -117,7 +119,7 @@ public class CombatManager : MonoBehaviour
             Debug.Log($"Active Combatant: {activeCombatant.Name}");
 
             ICombatMove move = await activeCombatant.GetMoveDataAsync();
-            activeCombatant.ExecuteMove(move, target);
+            // activeCombatant.ExecuteMove(move, target);
 
             NotifyBattlingCombatState();
             if (IsCombatOver())
@@ -129,8 +131,8 @@ public class CombatManager : MonoBehaviour
                     EventManager.Publish<OnCombatFinishedMessage>(new() { Result = CombatResult.PLAYER_LOSE });
                     break;
                 }
-                // DO: Check is enemy died
-                else if (!enemyCombatant.IsAlive)
+                // DO: Check is all enemy died
+                else if (combatants.Where(combatant => combatant.Name != "Player").All(enemy => !enemy.IsAlive))
                 {
                     // DO: Back to combat exploring, deactivate the enemy object
                     EventManager.Publish<OnCombatFinishedMessage>(new() { Result = CombatResult.PLAYER_WIN });
@@ -153,7 +155,7 @@ public class CombatManager : MonoBehaviour
 
     private void NotifyBattlingCombatState()
     {
-        EventManager.Publish<OnBattlingCombatMessage>(new() { PlayerCombatant = playerCombatant, EnemyCombatant = enemyCombatant, State = CurrentState });
+        EventManager.Publish<OnBattlingCombatMessage>(new() { PlayerCombatant = playerCombatant, State = CurrentState });
     }
 
     private void EndCombat()
@@ -161,7 +163,6 @@ public class CombatManager : MonoBehaviour
         IsCombating = false;
         CurrentState = CombatState.END;
         NotifyBattlingCombatState();
-        enemyCombatant = null;
         playerCombatant = null;
     }
 

@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -7,11 +5,14 @@ public class PlayerStatsUIController : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _playerStatsText, _enemyStatsText;
 
+    private void Awake() {
+        _enemyStatsText.gameObject.SetActive(false);
+    }
+
     private void OnEnable()
     {
         EventManager.Subscribe<OnBattlingCombatMessage>(OnBattlingCombat);
     }
-
 
     private void OnDisable()
     {
@@ -28,14 +29,11 @@ public class PlayerStatsUIController : MonoBehaviour
     private void OnBattlingCombat(OnBattlingCombatMessage message)
     {
         ICombatant player = message.PlayerCombatant;
-        ICombatant enemy = message.EnemyCombatant;
-        UpdateStats(player, enemy);
+        UpdateStats(player);
     }
 
-    private void UpdateStats(ICombatant player, ICombatant enemy)
+    private void UpdateStats(ICombatant player)
     {
         _playerStatsText.text = $"{player.Name} \nHealth\t:{player.Health} \nPower\t:{player.Power} \nDefense\t:{player.Defense} \nSpeed\t:{player.Speed}(x{player.SpeedModifier})";
-        _enemyStatsText.text = $"{enemy.Name} \nHealth\t:{enemy.Health} \nPower\t:{enemy.Power} \nDefense\t:{enemy.Defense} \nSpeed\t:{enemy.Speed}(x{enemy.SpeedModifier})";
     }
-
 }

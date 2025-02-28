@@ -17,7 +17,7 @@ public class Combatant : MonoBehaviour, ICombatant
     [field: SerializeField] public CombatantState State { get; private set; } = CombatantState.NORMAL;
     [field: SerializeField] public bool IsMoveReady { get; protected set; } = false;
     [field: SerializeField] public List<ScriptableObject> CombatMoveObjects = new();
-    [field: SerializeField] public List<ICombatMove> CombatMoves { get; private set;} = new();
+    [field: SerializeField] public List<ICombatMove> CombatMoves { get; private set; } = new();
 
     protected Animator _animator;
     private readonly int _attackAnim = Animator.StringToHash("Attack");
@@ -137,5 +137,17 @@ public class Combatant : MonoBehaviour, ICombatant
     private void NotifyRunFromCombat()
     {
         EventManager.Publish<OnCombatRunMessage>(new());
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is ICombatant other)
+            return Name == other.Name; // Compare by Name (or another unique property)
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return Name.GetHashCode();
     }
 }

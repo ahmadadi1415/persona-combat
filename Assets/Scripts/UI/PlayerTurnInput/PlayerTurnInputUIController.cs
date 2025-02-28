@@ -14,7 +14,7 @@ public class PlayerTurnInputUIController : MonoBehaviour
     [SerializeField] private Transform _attackButtonsHolder, _spellButtonsHolder, _combatantButtonHolder;
 
     private Dictionary<ICombatant, Button> _combatantButtons = new();
-    private List<ICombatant> _battlingCombatant;
+    private List<ICombatant> _battlingCombatant = new();
     private ICombatant _playerCombatant;
     private ICombatMove _choosenMove;
 
@@ -56,19 +56,19 @@ public class PlayerTurnInputUIController : MonoBehaviour
                 _combatantButtonHolder.gameObject.SetActive(true);
                 _descriptionText.text = combatMove.Description;
                 UpdateCombatantButtonState();
-            });
+            }, combatMove.MoveName);
         }
     }
 
     private void OnEnable()
     {
-        // EventManager.Subscribe<OnTriggerCombatMessage>(OnCombatTriggered);
+        EventManager.Subscribe<OnCombatStartedMessage>(OnCombatStarted);
         EventManager.Subscribe<OnWaitingPlayerTurnInputMessage>(OnWaitingPlayerTurnInput);
     }
 
     private void OnDisable()
     {
-        // EventManager.Unsubscribe<OnTriggerCombatMessage>(OnCombatTriggered);
+        EventManager.Unsubscribe<OnCombatStartedMessage>(OnCombatStarted);
         EventManager.Unsubscribe<OnWaitingPlayerTurnInputMessage>(OnWaitingPlayerTurnInput);
     }
 
@@ -85,21 +85,25 @@ public class PlayerTurnInputUIController : MonoBehaviour
         _runButton.onClick.AddListener(OnRunButtonClicked);
     }
 
-    private void OnCombatTriggered(OnTriggerCombatMessage message)
+    private void OnCombatStarted(OnCombatStartedMessage message)
     {
         _descriptionText.text = string.Empty;
         _battlingCombatant.Clear();
-        // _battlingCombatant = message.CombatCharacters;
+        _battlingCombatant = message.enemies;
+        _battlingCombatant.Add(message.player);
 
         InitCombatantSelectionButton();
     }
 
-    private Button InitButton(Transform parent, UnityAction onClick)
+    private Button InitButton(Transform parent, UnityAction onClick, string text)
     {
         GameObject buttonObject = GameObject.Instantiate(_buttonPrefab, parent);
         Button button = buttonObject.GetComponent<Button>();
         button.onClick.RemoveAllListeners();
         button.onClick.AddListener(onClick);
+
+        TextMeshProUGUI buttonText = buttonObject.GetComponentInChildren<TextMeshProUGUI>();
+        buttonText.text = text;
 
         return button;
     }
@@ -115,7 +119,7 @@ public class PlayerTurnInputUIController : MonoBehaviour
 
         foreach (ICombatant combatant in _battlingCombatant)
         {
-            Button button = InitButton(_combatantButtonHolder, () => NotifyChoosenMove(_choosenMove, combatant));
+            Button button = InitButton(_combatantButtonHolder, () => NotifyChoosenMove(_choosenMove, combatant), combatant.Name);
             _combatantButtons.Add(combatant, button);
         }
     }
@@ -167,8 +171,8 @@ public class PlayerTurnInputUIController : MonoBehaviour
     {
         // DO: Show list of button to show the spell moves
         _descriptionText.text = string.Empty;
-        _attackButtonsHolder.gameObject.SetActive(true);
-        _spellButtonsHolder.gameObject.SetActive(false);
+        _attackButtonsHolder.gameObject.SetActive(false);
+        _spellButtonsHolder.gameObject.SetActive(true);
         _combatantButtonHolder.gameObject.SetActive(false);
     }
 
