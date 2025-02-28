@@ -77,8 +77,8 @@ public class CombatManager : MonoBehaviour
         AdjustCombatStatus(_playerCombatant, message.AttackedCombatant);
 
         List<ICombatant> enemies = _combatants.Where(combatant => combatant.Name != "Player").ToList();
-        EventManager.Publish<OnCombatStartedMessage>(new() { player = _playerCombatant, enemies = enemies });
-        
+        EventManager.Publish<OnCombatStartedMessage>(new() { Player = _playerCombatant, Enemies = enemies });
+
         if (CheckIsCombatOver())
         {
             EndCombat();
@@ -152,7 +152,6 @@ public class CombatManager : MonoBehaviour
                 ICombatant target = isPlayerActiveCombatant ? _playerMoveTarget : _playerCombatant;
 
                 currentCombatant.ExecuteMove(move, target);
-
             }
 
             NotifyBattlingCombatState();

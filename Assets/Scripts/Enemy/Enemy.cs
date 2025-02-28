@@ -54,7 +54,7 @@ public class Enemy : MonoBehaviour, IAttackBehavior
 
     private void OnCombatStarted(OnCombatStartedMessage message)
     {
-        if (!message.enemies.Contains(_enemyCombatant)) return;
+        if (!message.Enemies.Contains(_enemyCombatant)) return;
 
         IsCombating = true;
     }

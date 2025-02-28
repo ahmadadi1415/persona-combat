@@ -89,8 +89,8 @@ public class PlayerTurnInputUIController : MonoBehaviour
     {
         _descriptionText.text = string.Empty;
         _battlingCombatant.Clear();
-        _battlingCombatant = message.enemies;
-        _battlingCombatant.Add(message.player);
+        _battlingCombatant = message.Enemies;
+        _battlingCombatant.Add(message.Player);
 
         InitCombatantSelectionButton();
     }

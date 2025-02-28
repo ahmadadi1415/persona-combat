@@ -9,6 +9,7 @@ public class Combatant : MonoBehaviour, ICombatant
 
     [field: SerializeField] public string Name { get; private set; }
     [field: SerializeField] public int Health { get; private set; }
+    [field: SerializeField] public int MaxHealth { get; private set; }
     [field: SerializeField] public int Speed { get; private set; }
     [field: SerializeField] public int Power { get; private set; }
     [field: SerializeField] public int Defense { get; private set; }
@@ -25,6 +26,7 @@ public class Combatant : MonoBehaviour, ICombatant
     {
         _animator = GetComponent<Animator>();
         Health = stats.BaseHealth;
+        MaxHealth = stats.BaseHealth;
         Name = stats.Name;
         ResetAttributes();
 

@@ -1,6 +1,5 @@
 
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
 
 public enum CombatantState { NORMAL, DEFEND }
@@ -9,6 +8,7 @@ public interface ICombatant
 {
     public string Name { get; }
     public int Health { get; }
+    public int MaxHealth { get; }
     public bool IsAlive => Health > 0;
     public int Speed { get; }
     public int Power { get; }

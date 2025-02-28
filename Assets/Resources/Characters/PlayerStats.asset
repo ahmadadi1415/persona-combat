@@ -15,5 +15,5 @@ MonoBehaviour:
   Name: Player
   BaseHealth: 150
   BaseSpeed: 25
-  BasePower: 20
+  BasePower: 200
   BaseDefense: 10
