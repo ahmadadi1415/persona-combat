@@ -16,7 +16,7 @@ public class CombatManager : MonoBehaviour
     private int currentTurnIndex = 0;
     [SerializeField] private int turnCount = 0;
 
-    private ICombatant playerCombatant, enemyCombatant;
+    private ICombatant playerCombatant;
     public ICombatant ActiveCombatant { get; private set; } = null;
 
     private void OnEnable()
@@ -48,9 +48,11 @@ public class CombatManager : MonoBehaviour
             case AttackedCharacter.ENEMY:
                 bool enemyAttackedFromBehind = message.AttackedDirection == RelativeDirection.BEHIND;
                 CombatType = enemyAttackedFromBehind ? CombatType.ADVANTAGE : CombatType.NORMAL;
+                playerCombatant = message.Attacker;
                 break;
             case AttackedCharacter.PLAYER:
                 CombatType = CombatType.AMBUSH;
+                playerCombatant = message.AttackedCombatant;
                 break;
         }
 
@@ -63,9 +65,9 @@ public class CombatManager : MonoBehaviour
             Debug.Log($"Turn: {combatant.Name}");
         }
 
+        AdjustCombatStatus(playerCombatant, message.AttackedCombatant);
         return;
 
-        AdjustCombatStatus();
         NotifyBattlingCombatState();
 
         StartCombat().Forget();
@@ -76,22 +78,19 @@ public class CombatManager : MonoBehaviour
         return !IsCombating || combatants.Any(combatant => !combatant.IsAlive);
     }
 
-    private void AdjustCombatStatus()
+    private void AdjustCombatStatus(ICombatant playerCombatant, ICombatant attackedEnemyCombatant)
     {
-        playerCombatant = combatants.First(combatant => combatant.Name.Equals("Player"));
-        enemyCombatant = combatants.First(combatant => !combatant.Name.Equals("Player"));
-
         switch (CombatType)
         {
             case CombatType.NORMAL:
                 break;
             case CombatType.ADVANTAGE:
                 playerCombatant.BuffSpeed(1.5f);
-                enemyCombatant.TakeDamage(playerCombatant.Power);
+                attackedEnemyCombatant.TakeDamage(playerCombatant.Power);
                 break;
             case CombatType.AMBUSH:
                 playerCombatant.BuffSpeed(0.5f);
-                playerCombatant.TakeDamage(enemyCombatant.Power);
+                playerCombatant.TakeDamage(attackedEnemyCombatant.Power);
                 break;
         }
     }
@@ -102,7 +101,8 @@ public class CombatManager : MonoBehaviour
 
         while (!IsCombatOver())
         {
-            if (turnCount % 2 == 0)
+            // DO: If all already doing the turn, wait the player input again
+            if (turnCount % combatants.Count == 0)
             {
                 // DO: Notify PlayerTurnInput to allow player input
                 EventManager.Publish<OnWaitingPlayerTurnInputMessage>(new() { IsTurnInputAllowed = true });
@@ -115,8 +115,6 @@ public class CombatManager : MonoBehaviour
 
             ICombatant activeCombatant = combatants[currentTurnIndex];
             Debug.Log($"Active Combatant: {activeCombatant.Name}");
-
-            ICombatant target = activeCombatant == enemyCombatant ? playerCombatant : enemyCombatant;
 
             ICombatMove move = await activeCombatant.GetMoveDataAsync();
             activeCombatant.ExecuteMove(move, target);
