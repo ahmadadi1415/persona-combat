@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -16,6 +18,7 @@ public class MonsterSpawner : MonoBehaviour
 
     private List<GameObject> _spawnedMonsters = new();
 
+    private CancellationTokenSource _cts;
 
     private void Awake()
     {
@@ -27,12 +30,17 @@ public class MonsterSpawner : MonoBehaviour
 
     private void OnEnable()
     {
+        _cts = new();
+        
         EventManager.Subscribe<OnBattlingCombatMessage>(OnBattlingCombat);
     }
 
 
     private void OnDisable()
     {
+        _cts?.Cancel();
+        _cts?.Dispose();
+
         EventManager.Unsubscribe<OnBattlingCombatMessage>(OnBattlingCombat);
     }
 
@@ -46,26 +54,35 @@ public class MonsterSpawner : MonoBehaviour
         StartMonsterSpawning().Forget();
     }
 
-    private async UniTaskVoid StartMonsterSpawning()
+    private async UniTask StartMonsterSpawning()
     {
         _currentSpawnInterval = _spawnInterval;
 
-        while (_spawnedMonsters.Count < _maxSpawnedMonster)
+        try
         {
-            await UniTask.WaitForSeconds(_currentSpawnInterval);
-            await UniTask.WaitUntil(() => _canSpawn);
-            SpawnMonster();
-            if (!_isConstantSpawning && _currentSpawnInterval > _minInterval)
+            while (_spawnedMonsters.Count < _maxSpawnedMonster)
             {
-                _currentSpawnInterval = Mathf.Clamp(_currentSpawnInterval - _decrementInterval, _minInterval, _currentSpawnInterval);
+                await UniTask.WaitForSeconds(_currentSpawnInterval, cancellationToken: _cts.Token);
+                await UniTask.WaitUntil(() => _canSpawn, cancellationToken: _cts.Token);
+                SpawnMonster();
+                if (!_isConstantSpawning && _currentSpawnInterval > _minInterval)
+                {
+                    _currentSpawnInterval = Mathf.Clamp(_currentSpawnInterval - _decrementInterval, _minInterval, _currentSpawnInterval);
+                }
             }
         }
+        catch (OperationCanceledException)
+        {
+
+            Debug.Log("Spawner stopped.");
+        }
+
     }
 
     private void SpawnMonster()
     {
-        float randomX = Random.Range(_spawningArea.min.x, _spawningArea.max.x);
-        float randomY = Random.Range(_spawningArea.min.y, _spawningArea.max.y);
+        float randomX = UnityEngine.Random.Range(_spawningArea.min.x, _spawningArea.max.x);
+        float randomY = UnityEngine.Random.Range(_spawningArea.min.y, _spawningArea.max.y);
         Vector3 randomPosition = new(randomX, randomY);
         GameObject spawnedMonster = GameObject.Instantiate(GetRandomMonster(), randomPosition, Quaternion.identity, _enemiesTransform);
         _spawnedMonsters.Add(spawnedMonster);
@@ -73,6 +90,6 @@ public class MonsterSpawner : MonoBehaviour
 
     private GameObject GetRandomMonster()
     {
-        return _enemyPrefabs[Random.Range(0, _enemyPrefabs.Length)];
+        return _enemyPrefabs[UnityEngine.Random.Range(0, _enemyPrefabs.Length)];
     }
 }

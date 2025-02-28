@@ -37,21 +37,26 @@ public class Combatant : MonoBehaviour, ICombatant
 
     protected virtual void OnEnable()
     {
-        EventManager.Subscribe<OnBattlingCombatMessage>(OnCombatEnded);
+        EventManager.Subscribe<OnBattlingCombatMessage>(OnCombatBattling);
     }
 
     protected virtual void OnDisable()
     {
-        EventManager.Unsubscribe<OnBattlingCombatMessage>(OnCombatEnded);
+        EventManager.Unsubscribe<OnBattlingCombatMessage>(OnCombatBattling);
     }
 
-    private void OnCombatEnded(OnBattlingCombatMessage message)
+    private void OnCombatBattling(OnBattlingCombatMessage message)
     {
         // DO: Reset speed modifier
-        if (message.State == CombatState.END)
+        switch (message.State)
         {
-            ResetAttributes();
-            Debug.Log("Combat is ended.");
+            case CombatState.BATTLING:
+                bool IsAlive = Health > 0;
+                gameObject.SetActive(IsAlive);
+                break;
+            case CombatState.END:
+                ResetAttributes();
+                break;
         }
     }
 
@@ -95,7 +100,10 @@ public class Combatant : MonoBehaviour, ICombatant
 
     public void TakeDamage(int damage)
     {
-        if (Health <= 0) return;
+        if (Health <= 0)
+        {
+            return;
+        }
 
         int damageTaken = damage;
         if (State == CombatantState.DEFEND)

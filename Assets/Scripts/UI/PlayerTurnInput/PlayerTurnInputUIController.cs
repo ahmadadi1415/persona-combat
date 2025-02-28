@@ -143,18 +143,18 @@ public class PlayerTurnInputUIController : MonoBehaviour
     {
         foreach (KeyValuePair<ICombatant, Button> item in _combatantButtons)
         {
-            bool isInteractable = false;
+            bool isInteractable = item.Key.IsAlive;
             switch (_choosenMove.TargetType)
             {
                 case TargetType.SELF:
                     // DO: Activate player button only if the target is self
-                    isInteractable = item.Key.Name == "Player";
+                    isInteractable &= item.Key.Name == "Player";
                     break;
                 case TargetType.ALLY:
-                    isInteractable = item.Key.Name == "Player";
+                    isInteractable &= item.Key.Name == "Player";
                     break;
                 case TargetType.ENEMY:
-                    isInteractable = item.Key.Name != "Player";
+                    isInteractable &= item.Key.Name != "Player";
                     break;
                 case TargetType.ANY:
                     isInteractable = true;
