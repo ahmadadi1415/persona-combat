@@ -1,11 +1,21 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class Portal : MonoBehaviour {
-
-    private void OnTriggerEnter2D(Collider2D collision)
+public class Portal : MonoBehaviour, IInteractable
+{
+    public void Interact()
     {
-        // DO: Load to Combat scene
         SceneManager.LoadScene("Combat");
     }
+
+    public void OnTriggerEnter()
+    {
+
+    }
+
+    public void OnTriggerExit()
+    {
+        
+    }
+
 }

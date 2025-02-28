@@ -26,16 +26,6 @@ public class PlayerController : MonoBehaviour, IAttackBehavior
         _playerAttackArea = GetComponentsInChildren<AttackArea>();
     }
 
-    private void OnEnable()
-    {
-        EventManager.Subscribe<OnTriggerCombatMessage>(OnCombatTriggered);
-    }
-
-    private void OnDisable()
-    {
-        EventManager.Unsubscribe<OnTriggerCombatMessage>(OnCombatTriggered);
-    }
-
     private void Update()
     {
         _playerMovement.Move(CanMove ? InputManager.Movement : Vector2.zero);
@@ -51,12 +41,6 @@ public class PlayerController : MonoBehaviour, IAttackBehavior
         }
     }
 
-    private void OnCombatTriggered(OnTriggerCombatMessage message)
-    {
-        // if (!message.CombatCharacters.Contains(_playerCombatant)) return;
-    }
-
-
     private async UniTaskVoid Attack()
     {
         CanAttack = false;
@@ -70,25 +54,6 @@ public class PlayerController : MonoBehaviour, IAttackBehavior
         await UniTask.WaitForSeconds(_playerCombatant.AttackCooldown);
         CanAttack = true;
     }
-
-    // private List<ICombatant> CheckCombatantAround()
-    // {
-    //     Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, triggerRadius, enemyLayer);
-    //     if (colliders.Length > 0)
-    //     {
-    //         List<ICombatant> combatants = new() { _playerCombatant };
-    //         foreach (var col in colliders)
-    //         {
-    //             if (col.TryGetComponent<ICombatant>(out var enemy))
-    //             {
-    //                 combatants.Add(enemy);
-    //             }
-    //         }
-
-    //         return combatants;
-    //     }
-    //     return null;
-    // }
 
     private RelativeDirection GetAttackDirectionFromEnemy(Combatant enemyCombatant)
     {

@@ -109,12 +109,13 @@ public class Enemy : MonoBehaviour, IAttackBehavior
 
     public void OnEnemyHit(Combatant attackedCombatant)
     {
-        // DO: Trigger battle
-        Debug.Log("Trigger battle from enemy");
 
         // DO: Enemy only trigger battle if player is ahead
         if (GetAttackDirectionFromPlayer(attackedCombatant) != RelativeDirection.AHEAD) return;
 
+        // DO: Trigger battle
+        Debug.Log("Trigger battle from enemy");
+        
         // DO: Start attack animation
         _animator.SetTrigger(AnimationStrings.ANIM_ATTACK);
 

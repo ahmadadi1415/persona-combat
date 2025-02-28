@@ -133,6 +133,10 @@ public class PlayerTurnInputUIController : MonoBehaviour
         _defendButton.interactable = message.IsTurnInputAllowed;
         _spellButton.interactable = message.IsTurnInputAllowed;
         _runButton.interactable = message.IsTurnInputAllowed;
+
+        _attackButtonsHolder.gameObject.SetActive(false);
+        _spellButtonsHolder.gameObject.SetActive(false);
+        _combatantButtonHolder.gameObject.SetActive(false);
     }
 
     private void UpdateCombatantButtonState()

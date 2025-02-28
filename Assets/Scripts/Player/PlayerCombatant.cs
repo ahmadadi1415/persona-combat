@@ -13,6 +13,7 @@ public class PlayerCombatant : Combatant
 
     protected override void OnDisable()
     {
+        base.OnDisable();
         EventManager.Unsubscribe<OnPlayerMoveChoosenMessage>(OnPlayerMoveChoosen);
     }
 
