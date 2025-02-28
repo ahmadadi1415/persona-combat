@@ -1,7 +1,8 @@
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+public class Enemy : MonoBehaviour, IAttackBehavior
 {
     private Combatant _enemyCombatant;
     private AttackArea _enemyAttackArea;
@@ -13,11 +14,16 @@ public class Enemy : MonoBehaviour
     public bool IsAttacking { get; private set; } = false;
     [field: SerializeField] public Vector2 FacingDirection { get; private set; } = Vector2.down;
 
+    [SerializeField] private LayerMask playerLayer;
+    [SerializeField] private float triggerRadius = 0.5f;
+
     private void Awake()
     {
         _enemyCombatant = GetComponent<EnemyCombatant>();
         _animator = GetComponent<Animator>();
         _enemyAttackArea = GetComponentInChildren<AttackArea>();
+
+        _enemyAttackArea.TargetCombatantTag = "Player";
     }
 
     private void OnEnable()
@@ -48,7 +54,7 @@ public class Enemy : MonoBehaviour
 
     private void OnCombatTriggered(OnTriggerCombatMessage message)
     {
-        if (!message.CombatCharacters.Contains(_enemyCombatant)) return;
+        // if (!message.CombatCharacters.Contains(_enemyCombatant)) return;
 
         IsCombating = true;
     }
@@ -81,11 +87,11 @@ public class Enemy : MonoBehaviour
 
     private bool IsPlayerAhead()
     {
-        bool isPlayerDetected = _enemyAttackArea.OtherCharacterDetected && _enemyAttackArea.DetectedCharacter.gameObject.CompareTag("Player");
+        bool isPlayerDetected = _enemyAttackArea.OtherCharacterDetected;
 
         if (!isPlayerDetected) return false;
 
-        Vector3 playerPosition = _enemyAttackArea.DetectedCharacter.gameObject.transform.position;
+        Vector3 playerPosition = _enemyAttackArea.AttackedCombatant.gameObject.transform.position;
         bool IsPlayerAhead = CharacterDirection.GetRelativePosition(transform.position, playerPosition, FacingDirection) == RelativeDirection.AHEAD;
         return IsPlayerAhead;
     }
@@ -103,27 +109,57 @@ public class Enemy : MonoBehaviour
     {
         CanAttack = false;
 
-        bool playerDetected = _enemyAttackArea.DetectedCharacter != null;
+        bool playerDetected = _enemyAttackArea.OtherCharacterDetected;
         if (playerDetected)
         {
-            EventManager.Publish<OnTriggerCombatMessage>(new()
-            {
-                AttackedCharacter = AttackedCharacter.PLAYER,
-                AttackedDirection = GetAttackDirectionFromPlayer(),
-                CombatCharacters = new() { _enemyAttackArea.DetectedCharacter, _enemyCombatant }
-            });
-        }
-        _animator.SetTrigger(AnimationStrings.ANIM_ATTACK);
+            // List<ICombatant> combatants = CheckCombatantAround();
+            // if (combatants != null && combatants.Count > 0)
+            // {
+            //     EventManager.Publish<OnTriggerCombatMessage>(new()
+            //     {
+            //         AttackedCharacter = AttackedCharacter.PLAYER,
+            //         AttackedDirection = GetAttackDirectionFromPlayer(),
+            //         CombatCharacters = combatants
+            //     });
+            // }
+            _animator.SetTrigger(AnimationStrings.ANIM_ATTACK);
 
-        await UniTask.WaitForSeconds(_enemyCombatant.AttackCooldown);
-        CanAttack = true;
+            await UniTask.WaitForSeconds(_enemyCombatant.AttackCooldown);
+            CanAttack = true;
+        }
+    }
+
+
+    private List<ICombatant> CheckCombatantAround()
+    {
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, 0.5f, playerLayer);
+        if (colliders.Length > 0)
+        {
+            List<ICombatant> combatants = new() { _enemyCombatant };
+            foreach (var col in colliders)
+            {
+                if (col.TryGetComponent<ICombatant>(out var enemy))
+                {
+                    combatants.Add(enemy);
+                }
+            }
+
+            return combatants;
+        }
+        return null;
     }
 
     private RelativeDirection GetAttackDirectionFromPlayer()
     {
-        Combatant playerCharacter = _enemyAttackArea.DetectedCharacter;
+        Combatant playerCharacter = _enemyAttackArea.AttackedCombatant;
         PlayerController player = playerCharacter.GetComponent<PlayerController>();
         Vector3 playerPosition = playerCharacter.gameObject.transform.position;
         return CharacterDirection.GetRelativePosition(playerPosition, transform.position, player.FacingDirection);
+    }
+
+    public void OnEnemyHit()
+    {
+        // DO: Trigger battle
+        Debug.Log("Trigger battle from enemy");
     }
 }

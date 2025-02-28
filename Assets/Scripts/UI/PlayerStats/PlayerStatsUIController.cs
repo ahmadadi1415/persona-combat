@@ -20,9 +20,9 @@ public class PlayerStatsUIController : MonoBehaviour
 
     private void OnCombatTriggered(OnTriggerCombatMessage message)
     {
-        ICombatant player = message.CombatCharacters.First(combatant => combatant.Name == "Player");
-        ICombatant enemy = message.CombatCharacters.First(combatant => combatant.Name != "Player");
-        UpdateStats(player, enemy);
+        // ICombatant player = message.CombatCharacters.First(combatant => combatant.Name == "Player");
+        // ICombatant enemy = message.CombatCharacters.First(combatant => combatant.Name != "Player");
+        // UpdateStats(player, enemy);
     }
 
     private void OnBattlingCombat(OnBattlingCombatMessage message)

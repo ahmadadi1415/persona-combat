@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PlayerCombatant : Combatant
 {
-    private MoveData PlayerMove = null;
+    private ICombatMove PlayerMove = null;
 
     private void OnEnable()
     {
@@ -21,7 +21,7 @@ public class PlayerCombatant : Combatant
         IsMoveReady = true;
     }
 
-    public override async UniTask<MoveData> GetMoveDataAsync()
+    public override async UniTask<ICombatMove> GetMoveDataAsync()
     {
         // DO: Wait from player input
         try

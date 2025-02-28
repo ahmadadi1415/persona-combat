@@ -1,9 +1,76 @@
+using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
+using Zenject;
 
 public class PlayerTurnInputUIController : MonoBehaviour
 {
+    [SerializeField] private GameObject _buttonPrefab;
     [SerializeField] private Button _attackButton, _defendButton, _spellButton, _runButton;
+    [SerializeField] private TextMeshProUGUI _descriptionText;
+    [SerializeField] private Transform _attackButtonsHolder, _spellButtonsHolder, _combatantButtonHolder;
+
+    private Dictionary<ICombatant, Button> _combatantButtons = new();
+    private List<ICombatant> _battlingCombatant;
+    private ICombatant _playerCombatant;
+    private ICombatMove _choosenMove;
+
+    [Inject]
+    private void Construct(ICombatant playerCombatant)
+    {
+        _playerCombatant = playerCombatant;
+    }
+
+    private void Awake()
+    {
+        _attackButtonsHolder.gameObject.SetActive(false);
+        _spellButtonsHolder.gameObject.SetActive(false);
+        _combatantButtonHolder.gameObject.SetActive(false);
+        InitCombatMoveSelectionButton();
+    }
+
+    private void InitCombatMoveSelectionButton()
+    {
+        foreach (ICombatMove combatMove in _playerCombatant.CombatMoves)
+        {
+            Transform moveHolder;
+            switch (combatMove.MoveType)
+            {
+                case MoveType.ATTACK:
+                    moveHolder = _attackButtonsHolder;
+                    break;
+                case MoveType.SPELL:
+                    moveHolder = _spellButtonsHolder;
+                    break;
+                default:
+                    moveHolder = null;
+                    continue;
+            }
+
+            InitButton(moveHolder, () =>
+            {
+                _choosenMove = combatMove;
+                _combatantButtonHolder.gameObject.SetActive(true);
+                _descriptionText.text = combatMove.Description;
+                UpdateCombatantButtonState();
+            });
+        }
+    }
+
+    private void OnEnable()
+    {
+        // EventManager.Subscribe<OnTriggerCombatMessage>(OnCombatTriggered);
+        EventManager.Subscribe<OnWaitingPlayerTurnInputMessage>(OnWaitingPlayerTurnInput);
+    }
+
+    private void OnDisable()
+    {
+        // EventManager.Unsubscribe<OnTriggerCombatMessage>(OnCombatTriggered);
+        EventManager.Unsubscribe<OnWaitingPlayerTurnInputMessage>(OnWaitingPlayerTurnInput);
+    }
 
     private void Start()
     {
@@ -18,12 +85,39 @@ public class PlayerTurnInputUIController : MonoBehaviour
         _runButton.onClick.AddListener(OnRunButtonClicked);
     }
 
-    private void OnEnable() {
-        EventManager.Subscribe<OnWaitingPlayerTurnInputMessage>(OnWaitingPlayerTurnInput);
+    private void OnCombatTriggered(OnTriggerCombatMessage message)
+    {
+        _descriptionText.text = string.Empty;
+        _battlingCombatant.Clear();
+        // _battlingCombatant = message.CombatCharacters;
+
+        InitCombatantSelectionButton();
     }
 
-    private void OnDisable() {
-        EventManager.Unsubscribe<OnWaitingPlayerTurnInputMessage>(OnWaitingPlayerTurnInput);
+    private Button InitButton(Transform parent, UnityAction onClick)
+    {
+        GameObject buttonObject = GameObject.Instantiate(_buttonPrefab, parent);
+        Button button = buttonObject.GetComponent<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(onClick);
+
+        return button;
+    }
+
+    private void InitCombatantSelectionButton()
+    {
+        _combatantButtons.Clear();
+        foreach (Transform child in _combatantButtonHolder)
+        {
+            child.gameObject.SetActive(false);
+            Destroy(child.gameObject);
+        }
+
+        foreach (ICombatant combatant in _battlingCombatant)
+        {
+            Button button = InitButton(_combatantButtonHolder, () => NotifyChoosenMove(_choosenMove, combatant));
+            _combatantButtons.Add(combatant, button);
+        }
     }
 
     private void OnWaitingPlayerTurnInput(OnWaitingPlayerTurnInputMessage message)
@@ -34,53 +128,66 @@ public class PlayerTurnInputUIController : MonoBehaviour
         _runButton.interactable = message.IsTurnInputAllowed;
     }
 
+    private void UpdateCombatantButtonState()
+    {
+        foreach (KeyValuePair<ICombatant, Button> item in _combatantButtons)
+        {
+            bool isInteractable = false;
+            switch (_choosenMove.TargetType)
+            {
+                case TargetType.SELF:
+                    // DO: Activate player button only if the target is self
+                    isInteractable = item.Key.Name == "Player";
+                    break;
+                case TargetType.ALLY:
+                    isInteractable = item.Key.Name == "Player";
+                    break;
+                case TargetType.ENEMY:
+                    isInteractable = item.Key.Name != "Player";
+                    break;
+                case TargetType.ANY:
+                    isInteractable = true;
+                    break;
+
+            }
+            item.Value.interactable = isInteractable;
+        }
+    }
+
     private void OnAttackButtonClicked()
     {
-        // DO: Notify the PlayerCombatant to set the attack move
-        MoveData attackMove = new()
-        {
-            MoveType = MoveType.ATTACK,
-            Power = 1
-        };
-        NotifyChoosenMove(attackMove);
+        // DO: Show list of button to show the attack moves
+        _descriptionText.text = string.Empty;
+        _attackButtonsHolder.gameObject.SetActive(true);
+        _spellButtonsHolder.gameObject.SetActive(false);
+        _combatantButtonHolder.gameObject.SetActive(false);
     }
 
     private void OnSpellButtonClicked()
     {
-        // DO: Notify the PlayerCombatant to set the spell move
-        MoveData spellMove = new()
-        {
-            MoveType = MoveType.SPELL,
-            Power = 10f
-        };
-        NotifyChoosenMove(spellMove);
+        // DO: Show list of button to show the spell moves
+        _descriptionText.text = string.Empty;
+        _attackButtonsHolder.gameObject.SetActive(true);
+        _spellButtonsHolder.gameObject.SetActive(false);
+        _combatantButtonHolder.gameObject.SetActive(false);
     }
 
     private void OnDefendButtonClicked()
     {
-        // DO: Notify the PlayerCombatant to set the defend move
-        MoveData spellMove = new()
-        {
-            MoveType = MoveType.DEFEND,
-            Power = 0.25f
-        };
-        NotifyChoosenMove(spellMove);
-
+        // DO: Choose the first defense move
+        _descriptionText.text = string.Empty;
+        NotifyChoosenMove(_playerCombatant.CombatMoves.First(move => move.MoveType == MoveType.DEFEND), _playerCombatant);
     }
 
     private void OnRunButtonClicked()
     {
-        // DO: Notify the PlayerCombatant to set the run move
-        MoveData spellMove = new()
-        {
-            MoveType = MoveType.RUN,
-            Power = 0
-        };
-        NotifyChoosenMove(spellMove);
+        // DO: Choose the first run move
+        _descriptionText.text = string.Empty;
+        NotifyChoosenMove(_playerCombatant.CombatMoves.First(move => move.MoveType == MoveType.RUN), _playerCombatant);
     }
 
-    private void NotifyChoosenMove(MoveData moveData)
+    private void NotifyChoosenMove(ICombatMove choosenCombatMove, ICombatant target)
     {
-        EventManager.Publish<OnPlayerMoveChoosenMessage>(new() { Move = moveData });
+        EventManager.Publish<OnPlayerMoveChoosenMessage>(new() { Move = choosenCombatMove });
     }
 }

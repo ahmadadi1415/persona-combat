@@ -1,3 +1,3 @@
 public struct OnPlayerMoveChoosenMessage {
-    public MoveData Move;    
+    public ICombatMove Move;    
 }

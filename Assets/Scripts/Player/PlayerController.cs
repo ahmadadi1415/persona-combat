@@ -1,12 +1,13 @@
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IAttackBehavior
 {
     private Combatant _playerCombatant;
     private PlayerMovement _playerMovement;
     private PlayerInventory _playerInventory;
-    private AttackArea _playerAttackArea;
+    private AttackArea[] _playerAttackArea;
     private InteractableDetection _interactableDetection;
     private Animator _animator;
 
@@ -22,8 +23,9 @@ public class PlayerController : MonoBehaviour
         _playerCombatant = GetComponent<PlayerCombatant>();
         _animator = GetComponent<Animator>();
         _interactableDetection = GetComponentInChildren<InteractableDetection>();
-        _playerAttackArea = GetComponentInChildren<AttackArea>();
+        _playerAttackArea = GetComponentsInChildren<AttackArea>();
     }
+
     private void OnEnable()
     {
         EventManager.Subscribe<OnTriggerCombatMessage>(OnCombatTriggered);
@@ -51,7 +53,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnCombatTriggered(OnTriggerCombatMessage message)
     {
-        if (!message.CombatCharacters.Contains(_playerCombatant)) return;
+        // if (!message.CombatCharacters.Contains(_playerCombatant)) return;
     }
 
 
@@ -61,15 +63,20 @@ public class PlayerController : MonoBehaviour
         CanMove = false;
 
         // DO: Notify CombatManager to switch to combat state
-        bool enemyDetected = _playerAttackArea.DetectedCharacter != null;
+        bool enemyDetected = _playerAttackArea.FirstOrDefault(area => area.OtherCharacterDetected) != null;
         if (enemyDetected)
         {
-            EventManager.Publish<OnTriggerCombatMessage>(new()
-            {
-                AttackedCharacter = AttackedCharacter.ENEMY,
-                AttackedDirection = GetAttackDirectionFromEnemy(),
-                CombatCharacters = new() { _playerAttackArea.DetectedCharacter, _playerCombatant }
-            });
+            // List<ICombatant> combatants = CheckCombatantAround();
+            // if (combatants != null && combatants.Count > 0)
+            // {
+            //     EventManager.Publish<OnTriggerCombatMessage>(new()
+            //     {
+            //         AttackedCharacter = AttackedCharacter.ENEMY,
+            //         AttackedDirection = GetAttackDirectionFromEnemy(),
+            //         FirstAttackedCombatant = _playerAttackArea.DetectedCombatants[0],
+            //         CombatCharacters = combatants
+            //     });
+            // }
         }
         _animator.SetTrigger(AnimationStrings.ANIM_ATTACK);
 
@@ -80,12 +87,37 @@ public class PlayerController : MonoBehaviour
         CanAttack = true;
     }
 
+    // private List<ICombatant> CheckCombatantAround()
+    // {
+    //     Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, triggerRadius, enemyLayer);
+    //     if (colliders.Length > 0)
+    //     {
+    //         List<ICombatant> combatants = new() { _playerCombatant };
+    //         foreach (var col in colliders)
+    //         {
+    //             if (col.TryGetComponent<ICombatant>(out var enemy))
+    //             {
+    //                 combatants.Add(enemy);
+    //             }
+    //         }
 
-    private RelativeDirection GetAttackDirectionFromEnemy()
+    //         return combatants;
+    //     }
+    //     return null;
+    // }
+
+    private RelativeDirection GetAttackDirectionFromEnemy(Combatant enemyCombatant)
     {
-        Combatant enemyCharacter = _playerAttackArea.DetectedCharacter;
+        Combatant enemyCharacter = enemyCombatant;
         Enemy enemy = enemyCharacter.gameObject.GetComponent<Enemy>();
         Vector3 enemyPosition = enemyCharacter.gameObject.transform.position;
         return CharacterDirection.GetRelativePosition(enemyPosition, transform.position, enemy.FacingDirection);
+    }
+
+    public void OnEnemyHit()
+    {
+        // DO: Trigger Combat
+        // Note: Combat Manager should check is any combating happened or not
+        Debug.Log("Trigger battle from player");
     }
 }

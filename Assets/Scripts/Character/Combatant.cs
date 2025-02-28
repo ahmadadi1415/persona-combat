@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Combatant : MonoBehaviour, ICombatant
@@ -14,6 +16,8 @@ public class Combatant : MonoBehaviour, ICombatant
     [field: SerializeField] public float SpeedModifier { get; private set; } = 1;
     [field: SerializeField] public CombatantState State { get; private set; } = CombatantState.NORMAL;
     [field: SerializeField] public bool IsMoveReady { get; protected set; } = false;
+    [field: SerializeField] public List<ScriptableObject> CombatMoveObjects = new();
+    [field: SerializeField] public List<ICombatMove> CombatMoves { get; private set;} = new();
 
     protected Animator _animator;
     private readonly int _attackAnim = Animator.StringToHash("Attack");
@@ -24,6 +28,12 @@ public class Combatant : MonoBehaviour, ICombatant
         Health = stats.BaseHealth;
         Name = stats.Name;
         ResetAttributes();
+
+        foreach (ScriptableObject moveObject in CombatMoveObjects)
+        {
+            ICombatMove combatMove = moveObject as ICombatMove;
+            CombatMoves.Add(combatMove);
+        }
     }
 
     private void OnEnable()
@@ -80,7 +90,7 @@ public class Combatant : MonoBehaviour, ICombatant
     public void BuffSpeed(float speedModifier)
     {
         if (speedModifier == 0) return;
-        SpeedModifier = speedModifier;
+        SpeedModifier += speedModifier;
     }
 
     public void TakeDamage(int damage)
@@ -108,26 +118,18 @@ public class Combatant : MonoBehaviour, ICombatant
         Defense += Mathf.FloorToInt(stats.BaseDefense * buffDefensePercentage);
     }
 
-    public virtual async UniTask<MoveData> GetMoveDataAsync() { return null; }
+    public virtual async UniTask<ICombatMove> GetMoveDataAsync() { return null; }
 
-    public void ExecuteMove(MoveData moveData, ICombatant target)
+    public void ExecuteMove(ICombatMove move, ICombatant target)
     {
-        switch (moveData.MoveType)
+        switch (move.MoveType)
         {
-            case MoveType.ATTACK:
-                PerformAttack();
-                target.TakeDamage((int)(moveData.Power * Power));
-                break;
-            case MoveType.DEFEND:
-                PerformDefend();
-                break;
-            case MoveType.SPELL:
-                Heal((int)moveData.Power);
-                PerformSpell();
-                break;
             case MoveType.RUN:
                 // DO: Notify CombatManager to stop combating
                 NotifyRunFromCombat();
+                break;
+            default:
+                move.Execute(this, target);
                 break;
         }
     }

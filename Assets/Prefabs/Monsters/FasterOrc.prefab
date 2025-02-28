@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5880736837886011280}
   - component: {fileID: 4855573723136776700}
   - component: {fileID: 8212226921947482665}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: AttackArea
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -80,7 +80,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da2bd16c7b4cf944388ba16e075c40bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <DetectedCharacter>k__BackingField: {fileID: 0}
+  <AttackedCombatant>k__BackingField: {fileID: 0}
+  <TargetCombatantTag>k__BackingField: Player
 --- !u!1 &5182589951035532038
 GameObject:
   m_ObjectHideFlags: 0
@@ -95,9 +96,9 @@ GameObject:
   - component: {fileID: 8623001121018750767}
   - component: {fileID: 8038616238273818531}
   - component: {fileID: 8688874337849008718}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: FasterOrc
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -110,7 +111,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5182589951035532038}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -2.13, y: -1.19, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -239,6 +240,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <FacingDirection>k__BackingField: {x: 0, y: -1}
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  triggerRadius: 0.5
 --- !u!114 &8688874337849008718
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -260,3 +265,7 @@ MonoBehaviour:
   <Defense>k__BackingField: 0
   <SpeedModifier>k__BackingField: 0
   <State>k__BackingField: 0
+  <IsMoveReady>k__BackingField: 0
+  CombatMoveObjects:
+  - {fileID: 11400000, guid: e6ef2bfc0f8acca44b49e280c0c267a6, type: 2}
+  - {fileID: 11400000, guid: 035999544407d234995cc9d7a40d8c4c, type: 2}

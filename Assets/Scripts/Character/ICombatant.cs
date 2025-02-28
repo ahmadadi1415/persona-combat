@@ -1,4 +1,6 @@
 
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
 
 public enum CombatantState { NORMAL, DEFEND }
@@ -14,6 +16,7 @@ public interface ICombatant
     public float SpeedModifier { get; }
     public CombatantState State { get; }
     public bool IsMoveReady { get; }
+    public List<ICombatMove> CombatMoves { get; }
 
     public float CurrentSpeed => Speed * SpeedModifier;
     public void TakeDamage(int damage);
@@ -21,6 +24,6 @@ public interface ICombatant
     public void BuffSpeed(float buffSpeedPercentage);
     public void BuffDefense(float buffDefensePercentage);
 
-    public UniTask<MoveData> GetMoveDataAsync();
-    public void ExecuteMove(MoveData moveData, ICombatant target);
+    public UniTask<ICombatMove> GetMoveDataAsync();
+    public void ExecuteMove(ICombatMove move, ICombatant target);
 }

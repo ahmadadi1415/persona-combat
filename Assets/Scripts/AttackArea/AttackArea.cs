@@ -2,19 +2,35 @@ using UnityEngine;
 
 public class AttackArea : MonoBehaviour
 {
-    [field: SerializeField] public Combatant DetectedCharacter { get; private set; }
-    public bool OtherCharacterDetected => DetectedCharacter != null;
+    [field: SerializeField] public Combatant AttackedCombatant { get; private set; }
+    [field: SerializeField] public string TargetCombatantTag { get; set; } = string.Empty;
+    public bool OtherCharacterDetected => AttackedCombatant != null;
+    private IAttackBehavior _attackBehavior;
+
+    private void Awake() {
+        _attackBehavior = GetComponentInParent<IAttackBehavior>();
+    }
+
+    private void OnDisable()
+    {
+        AttackedCombatant = null;
+    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.TryGetComponent(out Combatant character))
+        if (!collision.CompareTag(TargetCombatantTag)) return;
+
+        if (collision.TryGetComponent(out Combatant combatant))
         {
-            DetectedCharacter = character;
+            AttackedCombatant = combatant;
+            _attackBehavior.OnEnemyHit();
         }
     }
 
-    void OnTriggerExit2D(Collider2D collision)
+    private void OnTriggerExit2D(Collider2D collision)
     {
-        DetectedCharacter = null;
+        if (!collision.CompareTag(TargetCombatantTag)) return;
+
+        AttackedCombatant = null;
     }
 }

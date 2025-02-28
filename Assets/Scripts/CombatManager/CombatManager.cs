@@ -54,7 +54,7 @@ public class CombatManager : MonoBehaviour
                 break;
         }
 
-        combatants = message.CombatCharacters.OrderByDescending(combatant => combatant.Speed).ToList();
+        // combatants = message.CombatCharacters.OrderByDescending(combatant => combatant.Speed).ToList();
 
         foreach (var combatant in combatants)
         {
@@ -114,7 +114,7 @@ public class CombatManager : MonoBehaviour
 
             ICombatant target = activeCombatant == enemyCombatant ? playerCombatant : enemyCombatant;
 
-            MoveData move = await activeCombatant.GetMoveDataAsync();
+            ICombatMove move = await activeCombatant.GetMoveDataAsync();
             activeCombatant.ExecuteMove(move, target);
 
             NotifyBattlingCombatState();
