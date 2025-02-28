@@ -11,7 +11,7 @@ public class PlayerTurnInputUIController : MonoBehaviour
     [SerializeField] private GameObject _buttonPrefab;
     [SerializeField] private Button _attackButton, _defendButton, _spellButton, _runButton;
     [SerializeField] private TextMeshProUGUI _descriptionText;
-    [SerializeField] private Transform _attackButtonsHolder, _spellButtonsHolder, _combatantButtonHolder;
+    [SerializeField] private RectTransform _attackButtonsHolder, _spellButtonsHolder, _combatantButtonHolder;
 
     private Dictionary<ICombatant, Button> _combatantButtons = new();
     private List<ICombatant> _battlingCombatant = new();
@@ -29,14 +29,13 @@ public class PlayerTurnInputUIController : MonoBehaviour
         _attackButtonsHolder.gameObject.SetActive(false);
         _spellButtonsHolder.gameObject.SetActive(false);
         _combatantButtonHolder.gameObject.SetActive(false);
-        InitCombatMoveSelectionButton();
     }
 
     private void InitCombatMoveSelectionButton()
     {
         foreach (ICombatMove combatMove in _playerCombatant.CombatMoves)
         {
-            Transform moveHolder;
+            RectTransform moveHolder;
             switch (combatMove.MoveType)
             {
                 case MoveType.ATTACK:
@@ -74,6 +73,8 @@ public class PlayerTurnInputUIController : MonoBehaviour
 
     private void Start()
     {
+        InitCombatMoveSelectionButton();
+
         _attackButton.onClick.RemoveAllListeners();
         _spellButton.onClick.RemoveAllListeners();
         _defendButton.onClick.RemoveAllListeners();
@@ -95,16 +96,16 @@ public class PlayerTurnInputUIController : MonoBehaviour
         InitCombatantSelectionButton();
     }
 
-    private Button InitButton(Transform parent, UnityAction onClick, string text)
+    private Button InitButton(RectTransform parent, UnityAction onClick, string text)
     {
         GameObject buttonObject = GameObject.Instantiate(_buttonPrefab, parent);
+
         Button button = buttonObject.GetComponent<Button>();
         button.onClick.RemoveAllListeners();
         button.onClick.AddListener(onClick);
 
         TextMeshProUGUI buttonText = buttonObject.GetComponentInChildren<TextMeshProUGUI>();
         buttonText.text = text;
-
         return button;
     }
 

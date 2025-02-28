@@ -234,6 +234,7 @@ MonoBehaviour:
   stats: {fileID: 11400000, guid: c2977a7a5c6f32a4eb1377ca6062a7c8, type: 2}
   <Name>k__BackingField: 
   <Health>k__BackingField: 0
+  <MaxHealth>k__BackingField: 0
   <Speed>k__BackingField: 0
   <Power>k__BackingField: 0
   <Defense>k__BackingField: 0
@@ -248,6 +249,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 34e6d627793711d47a8c5cb717406539, type: 2}
   - {fileID: 11400000, guid: 837f9d6a59bc1474db220f2a41ec335e, type: 2}
   - {fileID: 11400000, guid: d5caa2841258b14419b3d931b3dd1a44, type: 2}
+  - {fileID: 11400000, guid: 9e0dae0f045cf5e4e887ae31c48173f9, type: 2}
 --- !u!1 &2203893812421133539
 GameObject:
   m_ObjectHideFlags: 0
