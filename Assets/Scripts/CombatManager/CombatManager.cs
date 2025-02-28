@@ -55,14 +55,15 @@ public class CombatManager : MonoBehaviour
         }
 
         Debug.Log($"Combat triggered! Attacked: {message.AttackedCombatant.Name}, Attacker: {message.Attacker}");
-        return;
-
-        // combatants = message.CombatCharacters.OrderByDescending(combatant => combatant.Speed).ToList();
+        combatants = FindCombatantAround(message.Attacker, message.AttackedCombatant);
+        combatants = combatants.OrderByDescending(combatant => combatant.Speed).ToList();
 
         foreach (var combatant in combatants)
         {
             Debug.Log($"Turn: {combatant.Name}");
         }
+
+        return;
 
         AdjustCombatStatus();
         NotifyBattlingCombatState();
@@ -164,5 +165,20 @@ public class CombatManager : MonoBehaviour
         NotifyBattlingCombatState();
         enemyCombatant = null;
         playerCombatant = null;
+    }
+
+    private List<ICombatant> FindCombatantAround(ICombatant triggerCombatant, ICombatant attackedCombatant)
+    {
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(((MonoBehaviour)triggerCombatant).transform.position, 1.5f);
+
+        List<ICombatant> combatants = new() { triggerCombatant, attackedCombatant };
+        foreach (var col in colliders)
+        {
+            if (col.TryGetComponent<ICombatant>(out var combatant))
+            {
+                if (!combatants.Contains(combatant)) combatants.Add(combatant);
+            }
+        }
+        return combatants;
     }
 }
