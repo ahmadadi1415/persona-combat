@@ -62,22 +62,6 @@ public class PlayerController : MonoBehaviour, IAttackBehavior
         CanAttack = false;
         CanMove = false;
 
-        // DO: Notify CombatManager to switch to combat state
-        bool enemyDetected = _playerAttackArea.FirstOrDefault(area => area.OtherCharacterDetected) != null;
-        if (enemyDetected)
-        {
-            // List<ICombatant> combatants = CheckCombatantAround();
-            // if (combatants != null && combatants.Count > 0)
-            // {
-            //     EventManager.Publish<OnTriggerCombatMessage>(new()
-            //     {
-            //         AttackedCharacter = AttackedCharacter.ENEMY,
-            //         AttackedDirection = GetAttackDirectionFromEnemy(),
-            //         FirstAttackedCombatant = _playerAttackArea.DetectedCombatants[0],
-            //         CombatCharacters = combatants
-            //     });
-            // }
-        }
         _animator.SetTrigger(AnimationStrings.ANIM_ATTACK);
 
         await UniTask.WaitForSeconds(0.5f);
@@ -114,10 +98,19 @@ public class PlayerController : MonoBehaviour, IAttackBehavior
         return CharacterDirection.GetRelativePosition(enemyPosition, transform.position, enemy.FacingDirection);
     }
 
-    public void OnEnemyHit()
+    public void OnEnemyHit(Combatant attackedCombatant)
     {
         // DO: Trigger Combat
         // Note: Combat Manager should check is any combating happened or not
         Debug.Log("Trigger battle from player");
+
+        // DO: Notify CombatManager to switch to combat state
+        EventManager.Publish<OnTriggerCombatMessage>(new()
+        {
+            AttackedCharacter = AttackedCharacter.ENEMY,
+            AttackedDirection = GetAttackDirectionFromEnemy(attackedCombatant),
+            AttackedCombatant = attackedCombatant,
+            Attacker = _playerCombatant
+        });
     }
 }

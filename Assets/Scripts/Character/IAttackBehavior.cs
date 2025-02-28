@@ -2,5 +2,5 @@ using UnityEngine;
 
 public interface IAttackBehavior
 {
-    public void OnEnemyHit();
+    public void OnEnemyHit(Combatant attackedCombatant);
 }

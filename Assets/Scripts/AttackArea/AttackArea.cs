@@ -23,7 +23,7 @@ public class AttackArea : MonoBehaviour
         if (collision.TryGetComponent(out Combatant combatant))
         {
             AttackedCombatant = combatant;
-            _attackBehavior.OnEnemyHit();
+            _attackBehavior.OnEnemyHit(AttackedCombatant);
         }
     }
 

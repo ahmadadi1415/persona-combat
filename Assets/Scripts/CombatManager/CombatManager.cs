@@ -54,6 +54,9 @@ public class CombatManager : MonoBehaviour
                 break;
         }
 
+        Debug.Log($"Combat triggered! Attacked: {message.AttackedCombatant.Name}, Attacker: {message.Attacker}");
+        return;
+
         // combatants = message.CombatCharacters.OrderByDescending(combatant => combatant.Speed).ToList();
 
         foreach (var combatant in combatants)

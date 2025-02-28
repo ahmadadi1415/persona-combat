@@ -149,17 +149,25 @@ public class Enemy : MonoBehaviour, IAttackBehavior
         return null;
     }
 
-    private RelativeDirection GetAttackDirectionFromPlayer()
+    private RelativeDirection GetAttackDirectionFromPlayer(Combatant playerCombatant)
     {
-        Combatant playerCharacter = _enemyAttackArea.AttackedCombatant;
-        PlayerController player = playerCharacter.GetComponent<PlayerController>();
-        Vector3 playerPosition = playerCharacter.gameObject.transform.position;
+        PlayerController player = playerCombatant.GetComponent<PlayerController>();
+        Vector3 playerPosition = playerCombatant.gameObject.transform.position;
         return CharacterDirection.GetRelativePosition(playerPosition, transform.position, player.FacingDirection);
     }
 
-    public void OnEnemyHit()
+    public void OnEnemyHit(Combatant attackedCombatant)
     {
         // DO: Trigger battle
         Debug.Log("Trigger battle from enemy");
+
+        // DO: Notify CombatManager to switch to combat state
+        EventManager.Publish<OnTriggerCombatMessage>(new()
+        {
+            AttackedCharacter = AttackedCharacter.ENEMY,
+            AttackedDirection = GetAttackDirectionFromPlayer(attackedCombatant),
+            AttackedCombatant = attackedCombatant,
+            Attacker = _enemyCombatant
+        });
     }
 }
