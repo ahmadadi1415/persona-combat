@@ -12,7 +12,7 @@ public class AttackCombatMove : ScriptableObject, ICombatMove
 
     public void Execute(ICombatant source, ICombatant target)
     {
-        target.TakeDamage((int)AttackPower * source.Power);
-        source.BuffSpeed(SpeedBoost);
+        target.TakeDamage((int)(AttackPower * source.Power));
+        source.AdjustSpeed(SpeedBoost);
     }
 }

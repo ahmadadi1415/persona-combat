@@ -21,8 +21,8 @@ public interface ICombatant
     public float CurrentSpeed => Speed * SpeedModifier;
     public void TakeDamage(int damage);
     public void Heal(int heal);
-    public void BuffSpeed(float buffSpeedPercentage);
-    public void BuffDefense(float buffDefensePercentage);
+    public void AdjustSpeed(float buffSpeedPercentage);
+    public void AdjustDefense(float buffDefensePercentage);
 
     public UniTask<ICombatMove> GetMoveDataAsync();
     public void ExecuteMove(ICombatMove move, ICombatant target);

@@ -1,3 +1,4 @@
+public enum MoveType { ATTACK, DEFEND, SPELL, RUN }
 public enum TargetType { SELF, ALLY, ENEMY, ANY }
 public interface ICombatMove
 {

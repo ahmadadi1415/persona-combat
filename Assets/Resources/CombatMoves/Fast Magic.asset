@@ -15,5 +15,5 @@ MonoBehaviour:
   <MoveName>k__BackingField: Fast Magic
   <Description>k__BackingField: Do magic damage, also increase your speed.
   <MagicPower>k__BackingField: 0.75
-  <SpeedBoost>k__BackingField: 0
+  <SpeedBoost>k__BackingField: 1
   <TargetType>k__BackingField: 2

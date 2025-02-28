@@ -5,12 +5,13 @@ public class PlayerCombatant : Combatant
 {
     private ICombatMove PlayerMove = null;
 
-    private void OnEnable()
+    protected override void OnEnable()
     {
+        base.OnEnable();
         EventManager.Subscribe<OnPlayerMoveChoosenMessage>(OnPlayerMoveChoosen);
     }
 
-    private void OnDisable()
+    protected override void OnDisable()
     {
         EventManager.Unsubscribe<OnPlayerMoveChoosenMessage>(OnPlayerMoveChoosen);
     }

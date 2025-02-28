@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
@@ -16,19 +17,28 @@ public class CombatManager : MonoBehaviour
     private int currentTurnIndex = 0;
     [SerializeField] private int turnCount = 0;
 
+    private ICombatant playerMoveTarget = null;
+
     private ICombatant playerCombatant;
     public ICombatant ActiveCombatant { get; private set; } = null;
 
     private void OnEnable()
     {
         EventManager.Subscribe<OnTriggerCombatMessage>(OnTriggerCombat);
+        EventManager.Subscribe<OnPlayerMoveChoosenMessage>(OnPlayerMoveChoosen);
         EventManager.Subscribe<OnCombatRunMessage>(OnCombatRun);
     }
 
     private void OnDisable()
     {
         EventManager.Unsubscribe<OnTriggerCombatMessage>(OnTriggerCombat);
+        EventManager.Unsubscribe<OnPlayerMoveChoosenMessage>(OnPlayerMoveChoosen);
         EventManager.Unsubscribe<OnCombatRunMessage>(OnCombatRun);
+    }
+
+    private void OnPlayerMoveChoosen(OnPlayerMoveChoosenMessage message)
+    {
+        playerMoveTarget = message.PlayerAttackTarget;
     }
 
     private void OnCombatRun(OnCombatRunMessage message)
@@ -70,9 +80,9 @@ public class CombatManager : MonoBehaviour
         List<ICombatant> enemies = combatants.Where(combatant => combatant.Name != "Player").ToList();
         EventManager.Publish<OnCombatStartedMessage>(new() { player = playerCombatant, enemies = enemies });
         NotifyBattlingCombatState();
-        
-        return;
+
         StartCombat().Forget();
+        return;
     }
 
     private bool IsCombatOver()
@@ -87,11 +97,11 @@ public class CombatManager : MonoBehaviour
             case CombatType.NORMAL:
                 break;
             case CombatType.ADVANTAGE:
-                playerCombatant.BuffSpeed(1.5f);
+                playerCombatant.AdjustSpeed(1.5f);
                 attackedEnemyCombatant.TakeDamage(playerCombatant.Power);
                 break;
             case CombatType.AMBUSH:
-                playerCombatant.BuffSpeed(0.5f);
+                playerCombatant.AdjustSpeed(-0.5f);
                 playerCombatant.TakeDamage(attackedEnemyCombatant.Power);
                 break;
         }
@@ -106,6 +116,8 @@ public class CombatManager : MonoBehaviour
             // DO: If all already doing the turn, wait the player input again
             if (turnCount % combatants.Count == 0)
             {
+                playerMoveTarget = null;
+
                 // DO: Notify PlayerTurnInput to allow player input
                 EventManager.Publish<OnWaitingPlayerTurnInputMessage>(new() { IsTurnInputAllowed = true });
 
@@ -119,9 +131,14 @@ public class CombatManager : MonoBehaviour
             Debug.Log($"Active Combatant: {activeCombatant.Name}");
 
             ICombatMove move = await activeCombatant.GetMoveDataAsync();
-            // activeCombatant.ExecuteMove(move, target);
+
+            bool isPlayerActiveCombatant = activeCombatant.Name == "Player";
+            ICombatant target = isPlayerActiveCombatant ? playerMoveTarget : playerCombatant;
+
+            activeCombatant.ExecuteMove(move, target);
 
             NotifyBattlingCombatState();
+
             if (IsCombatOver())
             {
                 // DO: Check is player died
@@ -129,21 +146,19 @@ public class CombatManager : MonoBehaviour
                 {
                     // DO: Notify GameManager, the game ended, player lose
                     EventManager.Publish<OnCombatFinishedMessage>(new() { Result = CombatResult.PLAYER_LOSE });
-                    break;
                 }
                 // DO: Check is all enemy died
                 else if (combatants.Where(combatant => combatant.Name != "Player").All(enemy => !enemy.IsAlive))
                 {
                     // DO: Back to combat exploring, deactivate the enemy object
                     EventManager.Publish<OnCombatFinishedMessage>(new() { Result = CombatResult.PLAYER_WIN });
-                    break;
                 }
                 // DO: Both is alive but the combat over, player flee
                 else
                 {
                     EventManager.Publish<OnCombatFinishedMessage>(new() { Result = CombatResult.PLAYER_FLEE });
-                    break;
                 }
+                break;
             }
 
             currentTurnIndex = (currentTurnIndex + 1) % combatants.Count;
@@ -163,6 +178,7 @@ public class CombatManager : MonoBehaviour
         IsCombating = false;
         CurrentState = CombatState.END;
         NotifyBattlingCombatState();
+        turnCount = 0;
         playerCombatant = null;
     }
 
@@ -170,8 +186,8 @@ public class CombatManager : MonoBehaviour
     {
         Collider2D[] colliders = Physics2D.OverlapCircleAll(((MonoBehaviour)triggerCombatant).transform.position, 1.5f);
 
-        List<ICombatant> combatants = new() { triggerCombatant, attackedCombatant };
-        foreach (var col in colliders)
+        List<ICombatant> combatants = new();
+        foreach (Collider2D col in colliders)
         {
             if (col.TryGetComponent<ICombatant>(out var combatant))
             {

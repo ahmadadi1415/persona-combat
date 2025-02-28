@@ -12,6 +12,6 @@ public class DefendCombatMove : ScriptableObject, ICombatMove
 
     public void Execute(ICombatant source, ICombatant target)
     {
-        target.BuffDefense(DefenseBoost);
+        target.AdjustDefense(DefenseBoost);
     }
 }

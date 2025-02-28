@@ -120,7 +120,10 @@ public class PlayerTurnInputUIController : MonoBehaviour
         foreach (ICombatant combatant in _battlingCombatant)
         {
             Button button = InitButton(_combatantButtonHolder, () => NotifyChoosenMove(_choosenMove, combatant), combatant.Name);
-            _combatantButtons.Add(combatant, button);
+            if (!_combatantButtons.ContainsKey(combatant))
+            {
+                _combatantButtons.Add(combatant, button);
+            }
         }
     }
 
@@ -192,6 +195,6 @@ public class PlayerTurnInputUIController : MonoBehaviour
 
     private void NotifyChoosenMove(ICombatMove choosenCombatMove, ICombatant target)
     {
-        EventManager.Publish<OnPlayerMoveChoosenMessage>(new() { Move = choosenCombatMove });
+        EventManager.Publish<OnPlayerMoveChoosenMessage>(new() { Move = choosenCombatMove, PlayerAttackTarget = target });
     }
 }

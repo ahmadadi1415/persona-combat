@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Combatant : MonoBehaviour, ICombatant
@@ -36,12 +35,12 @@ public class Combatant : MonoBehaviour, ICombatant
         }
     }
 
-    private void OnEnable()
+    protected virtual void OnEnable()
     {
         EventManager.Subscribe<OnBattlingCombatMessage>(OnCombatEnded);
     }
 
-    private void OnDisable()
+    protected virtual void OnDisable()
     {
         EventManager.Unsubscribe<OnBattlingCombatMessage>(OnCombatEnded);
     }
@@ -51,7 +50,8 @@ public class Combatant : MonoBehaviour, ICombatant
         // DO: Reset speed modifier
         if (message.State == CombatState.END)
         {
-            SpeedModifier = 1;
+            ResetAttributes();
+            Debug.Log("Combat is ended.");
         }
     }
 
@@ -87,7 +87,7 @@ public class Combatant : MonoBehaviour, ICombatant
             });
     }
 
-    public void BuffSpeed(float speedModifier)
+    public void AdjustSpeed(float speedModifier)
     {
         if (speedModifier == 0) return;
         SpeedModifier += speedModifier;
@@ -104,17 +104,21 @@ public class Combatant : MonoBehaviour, ICombatant
         }
 
         Health -= damageTaken;
+
+        State = CombatantState.NORMAL;
     }
 
     public void Heal(int heal)
     {
+        State = CombatantState.NORMAL;
         if (Health == stats.BaseHealth || Health <= 0) return;
 
         Health += heal;
     }
 
-    public void BuffDefense(float buffDefensePercentage)
+    public void AdjustDefense(float buffDefensePercentage)
     {
+        State = CombatantState.DEFEND;
         Defense += Mathf.FloorToInt(stats.BaseDefense * buffDefensePercentage);
     }
 
@@ -126,28 +130,27 @@ public class Combatant : MonoBehaviour, ICombatant
         {
             case MoveType.RUN:
                 // DO: Notify CombatManager to stop combating
-                NotifyRunFromCombat();
                 break;
-            default:
-                move.Execute(this, target);
+            case MoveType.ATTACK:
+                PerformAttack();
+                break;
+            case MoveType.DEFEND:
+                PerformDefend();
+                break;
+            case MoveType.SPELL:
+                PerformSpell();
                 break;
         }
-    }
-
-    private void NotifyRunFromCombat()
-    {
-        EventManager.Publish<OnCombatRunMessage>(new());
+        move.Execute(this, target);
     }
 
     public override bool Equals(object obj)
     {
-        if (obj is ICombatant other)
-            return Name == other.Name; // Compare by Name (or another unique property)
-        return false;
+        return obj is Combatant other && this == other;
     }
 
     public override int GetHashCode()
     {
-        return Name.GetHashCode();
+        return base.GetHashCode();
     }
 }

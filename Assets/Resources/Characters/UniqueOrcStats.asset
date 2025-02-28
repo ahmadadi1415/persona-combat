@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c3ba1788aa1a5041b388bb75e9422c2, type: 3}
   m_Name: UniqueOrcStats
   m_EditorClassIdentifier: 
-  Name: Orc
+  Name: Unique Orc
   BaseHealth: 100
   BaseSpeed: 30
   BasePower: 50

@@ -10,6 +10,11 @@ public class RunCombatMove : ScriptableObject, ICombatMove
 
     public void Execute(ICombatant source, ICombatant target)
     {
-        throw new System.NotImplementedException();
+        NotifyRunFromCombat();
+    }
+
+    private void NotifyRunFromCombat()
+    {
+        EventManager.Publish<OnCombatRunMessage>(new());
     }
 }

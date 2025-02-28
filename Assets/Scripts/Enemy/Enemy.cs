@@ -44,14 +44,6 @@ public class Enemy : MonoBehaviour, IAttackBehavior
         RandomizeFacingDirection().Forget();
     }
 
-    void Update()
-    {
-        if (CanAttack && !IsCombating && IsPlayerAhead())
-        {
-            Attack().Forget();
-        }
-    }
-
     private void OnCombatTriggered(OnTriggerCombatMessage message)
     {
         // if (!message.CombatCharacters.Contains(_enemyCombatant)) return;
@@ -85,17 +77,6 @@ public class Enemy : MonoBehaviour, IAttackBehavior
         }
     }
 
-    private bool IsPlayerAhead()
-    {
-        bool isPlayerDetected = _enemyAttackArea.OtherCharacterDetected;
-
-        if (!isPlayerDetected) return false;
-
-        Vector3 playerPosition = _enemyAttackArea.AttackedCombatant.gameObject.transform.position;
-        bool IsPlayerAhead = CharacterDirection.GetRelativePosition(transform.position, playerPosition, FacingDirection) == RelativeDirection.AHEAD;
-        return IsPlayerAhead;
-    }
-
     private void ChangeDirection()
     {
         Vector2[] possibleDirections = { Vector2.right, Vector2.left, Vector2.up, Vector2.down };
@@ -112,41 +93,11 @@ public class Enemy : MonoBehaviour, IAttackBehavior
         bool playerDetected = _enemyAttackArea.OtherCharacterDetected;
         if (playerDetected)
         {
-            // List<ICombatant> combatants = CheckCombatantAround();
-            // if (combatants != null && combatants.Count > 0)
-            // {
-            //     EventManager.Publish<OnTriggerCombatMessage>(new()
-            //     {
-            //         AttackedCharacter = AttackedCharacter.PLAYER,
-            //         AttackedDirection = GetAttackDirectionFromPlayer(),
-            //         CombatCharacters = combatants
-            //     });
-            // }
             _animator.SetTrigger(AnimationStrings.ANIM_ATTACK);
 
             await UniTask.WaitForSeconds(_enemyCombatant.AttackCooldown);
             CanAttack = true;
         }
-    }
-
-
-    private List<ICombatant> CheckCombatantAround()
-    {
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, 0.5f, playerLayer);
-        if (colliders.Length > 0)
-        {
-            List<ICombatant> combatants = new() { _enemyCombatant };
-            foreach (var col in colliders)
-            {
-                if (col.TryGetComponent<ICombatant>(out var enemy))
-                {
-                    combatants.Add(enemy);
-                }
-            }
-
-            return combatants;
-        }
-        return null;
     }
 
     private RelativeDirection GetAttackDirectionFromPlayer(Combatant playerCombatant)
@@ -161,10 +112,16 @@ public class Enemy : MonoBehaviour, IAttackBehavior
         // DO: Trigger battle
         Debug.Log("Trigger battle from enemy");
 
+        // DO: Enemy only trigger battle if player is ahead
+        if (GetAttackDirectionFromPlayer(attackedCombatant) != RelativeDirection.AHEAD) return;
+
+        // DO: Start attack animation
+        _animator.SetTrigger(AnimationStrings.ANIM_ATTACK);
+
         // DO: Notify CombatManager to switch to combat state
         EventManager.Publish<OnTriggerCombatMessage>(new()
         {
-            AttackedCharacter = AttackedCharacter.ENEMY,
+            AttackedCharacter = AttackedCharacter.PLAYER,
             AttackedDirection = GetAttackDirectionFromPlayer(attackedCombatant),
             AttackedCombatant = attackedCombatant,
             Attacker = _enemyCombatant

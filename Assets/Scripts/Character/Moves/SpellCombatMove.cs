@@ -13,7 +13,7 @@ public class SpellCombatMove : ScriptableObject, ICombatMove
     public void Execute(ICombatant source, ICombatant target)
     {
         // DO: Target take damage, Source gain speed
-        target.TakeDamage((int)MagicPower * source.Power);
-        source.BuffSpeed(SpeedBoost);
+        target.TakeDamage((int)(MagicPower * source.Power));
+        source.AdjustSpeed(SpeedBoost);
     }
 }
